@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vier Gewinnt Deluxe — mit KI & Bonus-Herausforderung</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- Header -->
+    <header class="header">
+      <div class="logo-area">
+        <div class="disc-icon disc-red"></div>
+        <div class="disc-icon disc-yellow"></div>
+        <h1>Vier Gewinnt <span>Deluxe</span></h1>
+      </div>
+      <div class="header-actions">
+        <button id="btn-sound" class="icon-btn" title="Sound an/aus" aria-label="Sound umschalten">
+          <span id="sound-icon">🔊</span>
+        </button>
+        <button id="btn-rules" class="btn btn-secondary" title="Spielregeln & Bonus">
+          <span>📖 Regeln</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Game Area -->
+    <main class="main-content">
+      
+      <!-- Left Panel: Controls & Mode Selection -->
+      <aside class="panel left-panel">
+        <div class="card">
+          <h2>Spielmodus</h2>
+          <div class="mode-selector">
+            <button id="mode-pvc" class="mode-btn active" data-mode="pvc">
+              <span class="icon">🤖</span>
+              <div class="label">
+                <strong>1 Spieler</strong>
+                <small>Gegen die KI</small>
+              </div>
+            </button>
+            <button id="mode-pvp" class="mode-btn" data-mode="pvp">
+              <span class="icon">👥</span>
+              <div class="label">
+                <strong>2 Spieler</strong>
+                <small>Lokal am PC</small>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- KI Settings (shown in PvC mode) -->
+        <div id="ai-settings-card" class="card">
+          <h2>KI-Spielstärke</h2>
+          <div class="difficulty-grid">
+            <button class="diff-btn" data-diff="1" title="Suchtiefe 1: Macht Fehler, ideal für Anfänger">
+              <span class="diff-badge green">Stufe 1</span>
+              <strong>Anfänger</strong>
+            </button>
+            <button class="diff-btn active" data-diff="2" title="Suchtiefe 3: Solide Grundtaktik & Zentrumskontrolle">
+              <span class="diff-badge blue">Stufe 2</span>
+              <strong>Fortgeschritten</strong>
+            </button>
+            <button class="diff-btn" data-diff="3" title="Suchtiefe 5: Blickt voraus und stellt Fallen">
+              <span class="diff-badge orange">Stufe 3</span>
+              <strong>Taktiker</strong>
+            </button>
+            <button class="diff-btn" data-diff="4" title="Suchtiefe 7+: Nahezu unbesiegbar mit Minimax">
+              <span class="diff-badge red">Stufe 4</span>
+              <strong>Meister</strong>
+            </button>
+          </div>
+          <div class="ai-status" id="ai-thinking" style="display: none;">
+            <div class="spinner"></div>
+            <span>KI berechnet Zug...</span>
+          </div>
+        </div>
+
+        <!-- Bonus Challenges (Zusatzregeln) -->
+        <div class="card bonus-card">
+          <div class="bonus-title">
+            <span class="bonus-tag">BONUS</span>
+            <h2>Zusatz-Regeln</h2>
+          </div>
+          
+          <label class="toggle-option" title="Jeder Spieler darf im eigenen Zug seinen untersten Stein herausziehen. Alle Steine darüber rutschen nach!">
+            <div class="toggle-info">
+              <strong>Pop-Out Regel</strong>
+              <small>Untersten eigenen Stein herausziehen</small>
+            </div>
+            <input type="checkbox" id="toggle-popout">
+            <span class="toggle-slider"></span>
+          </label>
+
+          <label class="toggle-option" title="2 zufällige Felder sind blockiert und können nicht bespielt werden!">
+            <div class="toggle-info">
+              <strong>Sperrfelder</strong>
+              <small>2 blockierte Hindernisfelder</small>
+            </div>
+            <input type="checkbox" id="toggle-obstacles">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <!-- Action Controls -->
+        <div class="card actions-card">
+          <button id="btn-restart" class="btn btn-primary full-width">
+            <span>🔄 Neues Spiel</span>
+          </button>
+          <button id="btn-undo" class="btn btn-secondary full-width" title="Letzten Zug zurücknehmen">
+            <span>↩ Zug zurück</span>
+          </button>
+        </div>
+      </aside>
+
+      <!-- Center: Game Board & Status -->
+      <section class="board-section">
+        
+        <!-- Scoreboard & Turn Display -->
+        <div class="game-hud">
+          <div class="player-badge p1-badge active" id="p1-hud">
+            <div class="disc-avatar disc-red"></div>
+            <div class="hud-details">
+              <span class="name" id="p1-name">Spieler 1 (Rot)</span>
+              <span class="score" id="p1-score">0 Siege</span>
+            </div>
+          </div>
+
+          <div class="turn-indicator" id="turn-indicator">
+            <span id="turn-text">Rot ist am Zug</span>
+          </div>
+
+          <div class="player-badge p2-badge" id="p2-hud">
+            <div class="hud-details right-align">
+              <span class="name" id="p2-name">Computer (Gelb)</span>
+              <span class="score" id="p2-score">0 Siege</span>
+            </div>
+            <div class="disc-avatar disc-yellow"></div>
+          </div>
+        </div>
+
+        <!-- Column Drop Hover Indicators -->
+        <div class="column-selectors" id="column-selectors">
+          <button class="col-btn" data-col="0">▼</button>
+          <button class="col-btn" data-col="1">▼</button>
+          <button class="col-btn" data-col="2">▼</button>
+          <button class="col-btn" data-col="3">▼</button>
+          <button class="col-btn" data-col="4">▼</button>
+          <button class="col-btn" data-col="5">▼</button>
+          <button class="col-btn" data-col="6">▼</button>
+        </div>
+
+        <!-- Physical Board Container -->
+        <div class="board-frame">
+          <div class="board-grid" id="board-grid">
+            <!-- 42 slots generated by JS -->
+          </div>
+        </div>
+
+        <!-- Pop-Out Control Bar (visible when Pop-Out is active) -->
+        <div class="popout-bar" id="popout-bar" style="display: none;">
+          <span class="popout-label">Pop-Out (Stein unten entfernen):</span>
+          <div class="popout-buttons" id="popout-buttons">
+            <button class="pop-btn" data-col="0" title="Spalte 1 Pop-Out">▲ 1</button>
+            <button class="pop-btn" data-col="1" title="Spalte 2 Pop-Out">▲ 2</button>
+            <button class="pop-btn" data-col="2" title="Spalte 3 Pop-Out">▲ 3</button>
+            <button class="pop-btn" data-col="3" title="Spalte 4 Pop-Out">▲ 4</button>
+            <button class="pop-btn" data-col="4" title="Spalte 5 Pop-Out">▲ 5</button>
+            <button class="pop-btn" data-col="5" title="Spalte 6 Pop-Out">▲ 6</button>
+            <button class="pop-btn" data-col="6" title="Spalte 7 Pop-Out">▲ 7</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Panel: Match Statistics & Algorithm Live Info -->
+      <aside class="panel right-panel">
+        <div class="card stats-card">
+          <h2>Match-Statistik</h2>
+          <div class="stat-row">
+            <span>Gespielte Runden:</span>
+            <strong id="stat-rounds">0</strong>
+          </div>
+          <div class="stat-row">
+            <span>Unentschieden:</span>
+            <strong id="stat-draws">0</strong>
+          </div>
+          <div class="stat-row">
+            <span>Züge in dieser Runde:</span>
+            <strong id="stat-moves">0</strong>
+          </div>
+        </div>
+
+        <div class="card algo-card">
+          <h2>KI-Einblick</h2>
+          <div class="algo-box">
+            <div class="algo-stat">
+              <span class="label">Algorithmus:</span>
+              <strong class="highlight">Minimax + &alpha;&beta;-Pruning</strong>
+            </div>
+            <div class="algo-stat">
+              <span class="label">Aktuelle Rechentiefe:</span>
+              <strong id="algo-depth">3 Züge</strong>
+            </div>
+            <div class="algo-stat">
+              <span class="label">Geprüfte Stellungen:</span>
+              <strong id="algo-nodes">0</strong>
+            </div>
+            <div class="algo-stat">
+              <span class="label">Berechnungszeit:</span>
+              <strong id="algo-time">0 ms</strong>
+            </div>
+          </div>
+          <p class="algo-hint">
+            Die KI analysiert alle möglichen Folgezüge, schneidet schlechte Äste mit <em>&alpha;-&beta;-Schnitten</em> sofort ab und bewertet Zentrumskontrolle und Drohungen.
+          </p>
+        </div>
+      </aside>
+
+    </main>
+
+    <!-- Modal: Rules & Bonus Explanation -->
+    <div class="modal-backdrop" id="rules-modal" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2>📖 Spielregeln & Bonus-Herausforderung</h2>
+          <button class="close-btn" id="btn-close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <h3>Klassische Regeln</h3>
+          <p>
+            Zwei Spieler lassen abwechselnd Steine in 7 Spalten fallen. Ein Stein fällt immer auf den tiefsten freien Platz der gewählten Spalte. 
+            Wer als Erster <strong>4 Steine in einer horizontalen, vertikalen oder diagonalen Linie</strong> platziert, gewinnt das Spiel!
+          </p>
+
+          <hr>
+
+          <h3>🌟 Bonus-Zusatzregeln (Aktivierbar in den Einstellungen)</h3>
+          
+          <div class="rule-feature">
+            <strong>1. Pop-Out Regel:</strong>
+            <p>
+              In deinem Zug musst du keinen neuen Stein oben hineinwerfen – du kannst stattdessen <em>deinen eigenen untersten Stein</em> einer Spalte herausziehen! 
+              Alle Steine darüber fallen um eine Position nach unten. Das kann völlig überraschende 4er-Ketten auslösen oder gegnerische Fallen zerstören.
+            </p>
+          </div>
+
+          <div class="rule-feature">
+            <strong>2. Sperrfelder (Hindernisse):</strong>
+            <p>
+              Zu Beginn jeder Runde werden zwei zufällige Felder als Hindernisse markiert (graue Barrieren). Diese Felder können nicht belegt werden – 
+              sie verändern alle Standard-Strategien und verlangen völlig neue Taktiken von Mensch und KI!
+            </p>
+          </div>
+
+          <hr>
+
+          <h3>🤖 Die 4 KI-Stufen</h3>
+          <ul>
+            <li><strong>Stufe 1 (Anfänger):</strong> Suchtiefe 1. Übersieht Fallen, spielt gelegentlich zufällig.</li>
+            <li><strong>Stufe 2 (Fortgeschritten):</strong> Suchtiefe 3. Achtet auf das Zentrum und blockt direkte 3er-Reihen.</li>
+            <li><strong>Stufe 3 (Taktiker):</strong> Suchtiefe 5. Erkennt Doppelbedrohungen ("Gabeln") mehrere Züge im Voraus.</li>
+            <li><strong>Stufe 4 (Meister):</strong> Suchtiefe 7+. Nutzt die volle Power des Minimax-Algorithmus mit Alpha-Beta-Astschnitt.</li>
+          </ul>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary" id="btn-close-modal-footer">Verstanden & Loslegen</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Win / Game Over Overlay -->
+    <div class="overlay" id="gameover-overlay" style="display: none;">
+      <div class="gameover-card">
+        <div class="winner-icon" id="winner-icon">🏆</div>
+        <h2 id="winner-title">Rot hat gewonnen!</h2>
+        <p id="winner-sub">Herzlichen Glückwunsch!</p>
+        <div class="overlay-buttons">
+          <button id="btn-play-again" class="btn btn-primary">Nochmal spielen</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="ai.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
