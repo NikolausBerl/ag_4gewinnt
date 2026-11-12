@@ -124,6 +124,7 @@ class ConnectFourGame {
     this.COLS = 7;
     
     this.ai = new ConnectFourAI();
+    this.tutor = new ConnectFourTutor(this.ai);
     this.sound = new SoundController();
 
     // Spielstatus
@@ -135,6 +136,10 @@ class ConnectFourGame {
     this.isAiTurn = false;
     this.winningLine = null;
     this.history = [];      // Für Undo
+
+    // Lernmodus & KI-Tutor
+    this.learnMode = false;
+    this.currentAnalysis = null;
 
     // Bonus-Regeln
     this.popOutEnabled = false;
@@ -154,6 +159,8 @@ class ConnectFourGame {
     this.bindEvents();
     this.renderBoard();
     this.updateUI();
+    this.clearMovePreview();
+    this.updateTutorUI();
   }
 
   createEmptyBoard() {
@@ -193,6 +200,28 @@ class ConnectFourGame {
     this.soundIconEl = document.getElementById('sound-icon');
     this.togglePopoutEl = document.getElementById('toggle-popout');
     this.toggleObstaclesEl = document.getElementById('toggle-obstacles');
+
+    // Lernmodus & KI-Tutor Elemente
+    this.btnLearnMode = document.getElementById('btn-learn-mode');
+    this.learnModeStatus = document.getElementById('learn-mode-status');
+    this.tutorQuickbar = document.getElementById('tutor-quickbar');
+    this.tutorQuickMsg = document.getElementById('tutor-quick-msg');
+    this.tutorCard = document.getElementById('tutor-card');
+    this.tutorTeaserCard = document.getElementById('tutor-teaser-card');
+    this.coachMoodIcon = document.getElementById('coach-mood-icon');
+    this.coachMoodTitle = document.getElementById('coach-mood-title');
+    this.coachText = document.getElementById('coach-text');
+    this.bestMoveCol = document.getElementById('best-move-col');
+    this.bestMoveTag = document.getElementById('best-move-tag');
+    this.bestMoveReason = document.getElementById('best-move-reason');
+    this.bestMoveBadge = document.getElementById('best-move-badge');
+    this.tutorColList = document.getElementById('tutor-col-list');
+    this.tutorStrategyTip = document.getElementById('tutor-strategy-tip');
+    this.strategyModal = document.getElementById('strategy-modal');
+    this.btnOpenStrategies = document.getElementById('btn-open-strategies');
+    this.btnCloseStrategyModal = document.getElementById('btn-close-strategy-modal');
+    this.btnCloseStrategyFooter = document.getElementById('btn-close-strategy-footer');
+    this.btnActivateLearn = document.getElementById('btn-activate-learn');
   }
 
   bindEvents() {
@@ -286,6 +315,72 @@ class ConnectFourGame {
     document.getElementById('btn-close-modal-footer').addEventListener('click', () => {
       this.rulesModalEl.style.display = 'none';
     });
+
+    // Lernmodus & KI-Tutor Events
+    if (this.btnLearnMode) {
+      this.btnLearnMode.addEventListener('click', () => this.toggleLearnMode());
+    }
+    if (this.btnActivateLearn) {
+      this.btnActivateLearn.addEventListener('click', () => this.toggleLearnMode(true));
+    }
+
+    // Tastenkürzel 'L' für schnelles Umschalten des Lernmodus
+    window.addEventListener('keydown', (e) => {
+      if ((e.key === 'l' || e.key === 'L') && !e.target.matches('input, textarea')) {
+        this.toggleLearnMode();
+      }
+    });
+
+    // Strategie Akademie Modal
+    if (this.btnOpenStrategies) {
+      this.btnOpenStrategies.addEventListener('click', () => {
+        this.strategyModal.style.display = 'flex';
+      });
+    }
+    if (this.btnCloseStrategyModal) {
+      this.btnCloseStrategyModal.addEventListener('click', () => {
+        this.strategyModal.style.display = 'none';
+      });
+    }
+    if (this.btnCloseStrategyFooter) {
+      this.btnCloseStrategyFooter.addEventListener('click', () => {
+        this.strategyModal.style.display = 'none';
+      });
+    }
+
+    // Klick auf den empfohlenen Zug führt ihn direkt aus
+    if (this.bestMoveBadge) {
+      this.bestMoveBadge.addEventListener('click', () => {
+        if (this.currentAnalysis && this.currentAnalysis.bestMove && !this.gameOver && !this.isAiTurn) {
+          const m = this.currentAnalysis.bestMove;
+          this.handlePlayerAction(m.action, m.col);
+        }
+      });
+    }
+
+    // Hover über Spalten-Buttons zeigt taktische Vorschau auf dem Brett
+    this.colSelectorsEl.addEventListener('mouseover', (e) => {
+      const btn = e.target.closest('.col-btn');
+      if (btn && this.learnMode) {
+        const col = parseInt(btn.getAttribute('data-col'), 10);
+        this.showMovePreview(col);
+      }
+    });
+    this.colSelectorsEl.addEventListener('mouseleave', () => {
+      if (this.learnMode) this.clearMovePreview();
+    });
+
+    // Hover über Slots auf dem Brett zeigt ebenfalls taktische Vorschau
+    this.boardGridEl.addEventListener('mouseover', (e) => {
+      const slot = e.target.closest('.slot');
+      if (slot && this.learnMode) {
+        const col = parseInt(slot.getAttribute('data-col'), 10);
+        this.showMovePreview(col);
+      }
+    });
+    this.boardGridEl.addEventListener('mouseleave', () => {
+      if (this.learnMode) this.clearMovePreview();
+    });
   }
 
   restartGame() {
@@ -313,6 +408,8 @@ class ConnectFourGame {
 
     this.renderBoard();
     this.updateUI();
+    this.clearMovePreview();
+    this.updateTutorUI();
   }
 
   renderBoard() {
@@ -361,6 +458,7 @@ class ConnectFourGame {
 
     if (!moveSuccess) return;
 
+    this.clearMovePreview();
     this.stats.currentMoves++;
     this.updateUI();
 
@@ -379,6 +477,7 @@ class ConnectFourGame {
     // Spielerwechsel
     this.currentPlayer = this.currentPlayer === 1 ? 2 : 1;
     this.updateUI();
+    this.updateTutorUI();
 
     // KI-Zug auslösen falls Modus PvC
     if (this.gameMode === 'pvc' && this.currentPlayer === 2) {
@@ -432,6 +531,8 @@ class ConnectFourGame {
     this.isAiTurn = true;
     this.aiThinkingEl.style.display = 'flex';
     this.turnTextEl.textContent = 'KI überlegt...';
+    this.clearMovePreview();
+    this.updateTutorUI();
 
     // Kleines Timeout, damit der Mensch den Zug animiert sieht und das UI nicht blockiert
     const delay = this.difficulty === 1 ? 250 : (this.difficulty === 2 ? 350 : 450);
@@ -469,6 +570,7 @@ class ConnectFourGame {
 
       this.currentPlayer = 1;
       this.updateUI();
+      this.updateTutorUI();
     }, delay);
   }
 
@@ -495,6 +597,8 @@ class ConnectFourGame {
 
     this.renderBoard();
     this.updateUI();
+    this.clearMovePreview();
+    this.updateTutorUI();
   }
 
   showGameOverModal(icon, title, subtitle) {
@@ -531,6 +635,8 @@ class ConnectFourGame {
 
     this.renderBoard();
     this.updateUI();
+    this.clearMovePreview();
+    this.updateTutorUI();
   }
 
   updateUI() {
@@ -590,6 +696,276 @@ class ConnectFourGame {
 
   getSlotElement(row, col) {
     return this.boardGridEl.querySelector(`.slot[data-row="${row}"][data-col="${col}"]`);
+  }
+
+  /**
+   * Schaltet den Lernmodus mit KI-Tutor ein oder aus
+   * @param {boolean} [explicitState]
+   */
+  toggleLearnMode(explicitState) {
+    if (typeof explicitState === 'boolean') {
+      this.learnMode = explicitState;
+    } else {
+      this.learnMode = !this.learnMode;
+    }
+
+    if (this.learnMode) {
+      if (this.btnLearnMode) this.btnLearnMode.classList.add('active');
+      if (this.learnModeStatus) this.learnModeStatus.textContent = 'AN';
+      document.body.classList.add('learn-mode-on');
+      if (this.tutorQuickbar) this.tutorQuickbar.style.display = 'flex';
+      if (this.tutorCard) this.tutorCard.style.display = 'block';
+      if (this.tutorTeaserCard) this.tutorTeaserCard.style.display = 'none';
+      this.updateTutorUI();
+    } else {
+      if (this.btnLearnMode) this.btnLearnMode.classList.remove('active');
+      if (this.learnModeStatus) this.learnModeStatus.textContent = 'AUS';
+      document.body.classList.remove('learn-mode-on');
+      if (this.tutorQuickbar) this.tutorQuickbar.style.display = 'none';
+      if (this.tutorCard) this.tutorCard.style.display = 'none';
+      if (this.tutorTeaserCard) this.tutorTeaserCard.style.display = 'block';
+      this.clearMovePreview();
+      this.clearColBadges();
+    }
+  }
+
+  /**
+   * Führt die KI-Tutor-Analyse aus und aktualisiert die UI-Elemente
+   */
+  updateTutorUI() {
+    if (!this.learnMode) return;
+
+    if (this.gameOver) {
+      if (this.coachMoodIcon) this.coachMoodIcon.textContent = '🏁';
+      if (this.coachMoodTitle) this.coachMoodTitle.textContent = 'Spiel beendet';
+      if (this.coachText) this.coachText.textContent = 'Die Partie ist vorbei! Klicke auf "Neues Spiel", um das nächste Taktik-Training zu starten.';
+      if (this.tutorQuickMsg) this.tutorQuickMsg.innerHTML = '<strong>Partie beendet.</strong> Bereit für die nächste Runde?';
+      this.clearColBadges();
+      return;
+    }
+
+    if (this.isAiTurn) {
+      if (this.coachMoodIcon) this.coachMoodIcon.textContent = '⏳';
+      if (this.coachMoodTitle) this.coachMoodTitle.textContent = 'KI rechnet...';
+      if (this.coachText) this.coachText.textContent = 'Die KI überlegt ihren Zug. Beobachte aufmerksam, wie sie auf Bedrohungen reagiert und das Zentrum nutzt!';
+      if (this.tutorQuickMsg) this.tutorQuickMsg.innerHTML = '<strong>Die KI ist am Zug...</strong> Gleich bist du wieder dran!';
+      return;
+    }
+
+    // Taktische Analyse durchführen
+    this.currentAnalysis = this.tutor.analyzeBoard(this.board, this.currentPlayer, this.popOutEnabled);
+    const analysis = this.currentAnalysis;
+
+    // 1. Spalten-Badges über den Drop-Buttons aktualisieren
+    analysis.moves.forEach((m, c) => {
+      const badgeEl = document.getElementById(`col-badge-${c}`);
+      if (badgeEl) {
+        if (m.isFull) {
+          badgeEl.className = 'col-badge badge-full';
+          badgeEl.textContent = '—';
+        } else {
+          badgeEl.className = `col-badge ${m.badgeClass}`;
+          badgeEl.textContent = m.badge;
+        }
+      }
+    });
+
+    // 2. Coach-Sprechblase aktualisieren
+    const coachMsg = analysis.coachMessage;
+    if (this.coachMoodIcon) this.coachMoodIcon.textContent = coachMsg.icon;
+    if (this.coachMoodTitle) this.coachMoodTitle.textContent = coachMsg.title;
+    if (this.coachText) this.coachText.textContent = coachMsg.text;
+
+    // 3. Best-Move Box
+    const best = analysis.bestMove;
+    if (best && !best.isFull) {
+      if (this.bestMoveCol) this.bestMoveCol.textContent = `Spalte ${best.col + 1}`;
+      if (this.bestMoveTag) {
+        this.bestMoveTag.textContent = best.badge;
+        this.bestMoveTag.className = `best-move-tag ${best.badgeClass}`;
+      }
+      if (this.bestMoveReason) {
+        this.bestMoveReason.textContent = best.tacticalReason;
+      }
+    } else {
+      if (this.bestMoveCol) this.bestMoveCol.textContent = 'Kein Zug';
+      if (this.bestMoveTag) this.bestMoveTag.textContent = '—';
+      if (this.bestMoveReason) this.bestMoveReason.textContent = 'Keine freien legalen Züge mehr verfügbar.';
+    }
+
+    // 4. Spalten-Liste im Tutor-Panel
+    if (this.tutorColList) {
+      this.tutorColList.innerHTML = '';
+      analysis.moves.forEach((m, idx) => {
+        const item = document.createElement('div');
+        item.className = 'tutor-col-item' + (m.isBest ? ' is-best' : '');
+        item.setAttribute('data-col', idx);
+
+        let dotColor = '#94a3b8';
+        if (m.type === 'WIN') dotColor = '#eab308';
+        else if (m.type === 'MUST_BLOCK') dotColor = '#06b6d4';
+        else if (m.type === 'PREEMPTIVE_BLOCK') dotColor = '#06b6d4';
+        else if (m.type === 'FORK' || m.type === 'STRONG_ATTACK') dotColor = '#10b981';
+        else if (m.type === 'BLUNDER' || m.type === 'FATAL_IGNORE') dotColor = '#ef4444';
+        else if (m.type === 'ALLOWS_FORK') dotColor = '#ea580c';
+        else if (m.type === 'CENTER') dotColor = '#3b82f6';
+        else if (m.type === 'SOLID') dotColor = '#60a5fa';
+        else if (m.type === 'RISKY') dotColor = '#f97316';
+        else if (m.type === 'EDGE') dotColor = '#f59e0b';
+        else if (m.isFull) dotColor = '#475569';
+
+        item.innerHTML = `
+          <div class="col-item-left">
+            <span class="col-dot" style="background: ${dotColor};"></span>
+            <span class="col-item-name">Spalte ${idx + 1}</span>
+            <span class="col-rating-meter"><span class="col-rating-fill" style="width: ${m.ratingPercent}%; background: ${dotColor};"></span></span>
+          </div>
+          <div class="col-item-right">
+            <span class="col-item-tag ${m.badgeClass}">${m.ratingGrade || m.badge}</span>
+          </div>
+        `;
+
+        item.addEventListener('mouseenter', () => this.showMovePreview(idx));
+        item.addEventListener('mouseleave', () => this.clearMovePreview());
+        item.addEventListener('click', () => {
+          if (!this.gameOver && !this.isAiTurn && !m.isFull) {
+            this.handlePlayerAction('drop', idx);
+          }
+        });
+
+        this.tutorColList.appendChild(item);
+      });
+    }
+
+    // 5. Grundstrategie-Tipp (wechselnd basierend auf Spielstand)
+    if (this.tutorStrategyTip) {
+      const lessons = this.tutor.lessons;
+      const lessonIdx = (this.stats.currentMoves + this.stats.rounds) % lessons.length;
+      const currentLesson = lessons[lessonIdx];
+      this.tutorStrategyTip.innerHTML = `<strong>${currentLesson.title}:</strong> ${currentLesson.proTip}`;
+    }
+
+    // 6. Quickbar Standardtext
+    if (this.tutorQuickMsg) {
+      if (best && !best.isFull) {
+        this.tutorQuickMsg.innerHTML = `<strong>Tutor-Empfehlung:</strong> Spiele <strong>Spalte ${best.col + 1}</strong> [${best.ratingGrade}] — ${best.tacticalReason}`;
+      } else {
+        this.tutorQuickMsg.innerHTML = 'Wähle deinen nächsten Zug.';
+      }
+    }
+  }
+
+  /**
+   * Zeigt die visuelle Veranschaulichung des Zugs auf dem Spielfeld (Ghost-Disc, Gefahren, Drohungen)
+   * @param {number} col
+   */
+  showMovePreview(col) {
+    if (!this.learnMode || !this.currentAnalysis || this.gameOver || this.isAiTurn) return;
+
+    this.clearMovePreview();
+
+    const move = this.currentAnalysis.moves[col];
+    if (!move) return;
+
+    if (move.isFull) {
+      if (this.tutorQuickMsg) {
+        this.tutorQuickMsg.innerHTML = `<strong>Spalte ${col + 1} ist voll!</strong> Wähle bitte eine freie Spalte.`;
+      }
+      return;
+    }
+
+    // Zielfeld hervorheben mit Ghost-Disc
+    const targetRow = move.row;
+    if (targetRow !== -1) {
+      const slot = this.getSlotElement(targetRow, col);
+      if (slot && !slot.querySelector('.ghost-disc')) {
+        const ghost = document.createElement('div');
+        ghost.className = `ghost-disc ghost-${move.type.toLowerCase()}`;
+        const icon = move.badge.split(' ')[0] || '●';
+        ghost.textContent = icon;
+        slot.appendChild(ghost);
+      }
+    }
+
+    // Gefahrenfeld hervorheben (Blunder, ungeblockte Drohung oder drohende Gegner-Gabel)
+    if (move.highlights && move.highlights.dangerCell) {
+      const [dr, dc] = move.highlights.dangerCell;
+      const dangerSlot = this.getSlotElement(dr, dc);
+      if (dangerSlot) {
+        dangerSlot.classList.add('danger-field');
+        if (move.type === 'FATAL_IGNORE') {
+          dangerSlot.setAttribute('data-danger-label', `⚠️ GEGNER-SIEG IN SPALTE ${dc + 1}!`);
+        } else if (move.type === 'ALLOWS_FORK') {
+          dangerSlot.setAttribute('data-danger-label', `⚠️ DROHENDE GEGNER-GABEL IN SPALTE ${dc + 1}!`);
+        } else {
+          dangerSlot.setAttribute('data-danger-label', '⚠️ GEGNER-SIEG!');
+        }
+      }
+    }
+
+    // Gegnerische Drohungslinie hervorheben
+    if (move.highlights && move.highlights.oppWinLine) {
+      for (const [r, c] of move.highlights.oppWinLine) {
+        const sl = this.getSlotElement(r, c);
+        const disc = sl ? sl.querySelector('.disc') : null;
+        if (disc) disc.classList.add('threat-highlight');
+      }
+    }
+
+    // Eigene Gewinnlinie hervorheben
+    if (move.highlights && move.highlights.winLine) {
+      for (const [r, c] of move.highlights.winLine) {
+        const sl = this.getSlotElement(r, c);
+        const disc = sl ? sl.querySelector('.disc') : null;
+        if (disc) disc.classList.add('win-highlight');
+      }
+    }
+
+    // Quickbar anpassen mit Bewertung und detaillierter Erklärung
+    if (this.tutorQuickMsg) {
+      this.tutorQuickMsg.innerHTML = `<strong>Spalte ${col + 1} [${move.ratingGrade}]:</strong> ${move.headline} — ${move.explanation}`;
+    }
+  }
+
+  /**
+   * Entfernt alle visuellen Vorschau-Elemente vom Spielfeld
+   */
+  clearMovePreview() {
+    // Alle Ghost-Discs entfernen
+    const ghosts = this.boardGridEl.querySelectorAll('.ghost-disc');
+    ghosts.forEach(g => g.remove());
+
+    // Alle Danger-Fields entfernen
+    const dangerSlots = this.boardGridEl.querySelectorAll('.danger-field');
+    dangerSlots.forEach(s => {
+      s.classList.remove('danger-field');
+      s.removeAttribute('data-danger-label');
+    });
+
+    // Alle Threat/Win Highlights entfernen
+    const highlightedDiscs = this.boardGridEl.querySelectorAll('.threat-highlight, .win-highlight');
+    highlightedDiscs.forEach(d => d.classList.remove('threat-highlight', 'win-highlight'));
+
+    // Quickbar auf Best-Move zurücksetzen
+    if (this.learnMode && this.currentAnalysis && this.currentAnalysis.bestMove && this.tutorQuickMsg) {
+      const best = this.currentAnalysis.bestMove;
+      if (!best.isFull) {
+        this.tutorQuickMsg.innerHTML = `<strong>Tutor-Empfehlung:</strong> Spiele <strong>Spalte ${best.col + 1}</strong> [${best.ratingGrade}] — ${best.tacticalReason}`;
+      }
+    }
+  }
+
+  /**
+   * Leert alle Spalten-Badges
+   */
+  clearColBadges() {
+    for (let c = 0; c < this.COLS; c++) {
+      const badge = document.getElementById(`col-badge-${c}`);
+      if (badge) {
+        badge.className = 'col-badge';
+        badge.textContent = '';
+      }
+    }
   }
 }
 

@@ -20,6 +20,10 @@
         <h1>Vier Gewinnt <span>Deluxe</span></h1>
       </div>
       <div class="header-actions">
+        <button id="btn-learn-mode" class="btn btn-learn-toggle" title="Lernmodus mit KI-Tutor aktivieren/deaktivieren (Taste L)" aria-label="Lernmodus umschalten">
+          <span class="learn-icon">🎓</span>
+          <span class="learn-label">Lernmodus: <strong id="learn-mode-status">AUS</strong></span>
+        </button>
         <button id="btn-sound" class="icon-btn" title="Sound an/aus" aria-label="Sound umschalten">
           <span id="sound-icon">🔊</span>
         </button>
@@ -144,15 +148,26 @@
           </div>
         </div>
 
+        <!-- Tutor Live Quickbar (visible in Learn Mode) -->
+        <div class="tutor-quickbar" id="tutor-quickbar" style="display: none;">
+          <div class="tutor-quick-badge">
+            <span class="tutor-avatar-mini">🎓</span>
+            <span class="tutor-name-mini">Tutor-Coach:</span>
+          </div>
+          <div class="tutor-quick-msg" id="tutor-quick-msg">
+            Fahre mit der Maus über die Spalten oder wähle einen Zug, um die Analyse zu sehen.
+          </div>
+        </div>
+
         <!-- Column Drop Hover Indicators -->
         <div class="column-selectors" id="column-selectors">
-          <button class="col-btn" data-col="0">▼</button>
-          <button class="col-btn" data-col="1">▼</button>
-          <button class="col-btn" data-col="2">▼</button>
-          <button class="col-btn" data-col="3">▼</button>
-          <button class="col-btn" data-col="4">▼</button>
-          <button class="col-btn" data-col="5">▼</button>
-          <button class="col-btn" data-col="6">▼</button>
+          <button class="col-btn" data-col="0"><span class="col-badge" id="col-badge-0"></span><span class="col-arrow">▼</span></button>
+          <button class="col-btn" data-col="1"><span class="col-badge" id="col-badge-1"></span><span class="col-arrow">▼</span></button>
+          <button class="col-btn" data-col="2"><span class="col-badge" id="col-badge-2"></span><span class="col-arrow">▼</span></button>
+          <button class="col-btn" data-col="3"><span class="col-badge" id="col-badge-3"></span><span class="col-arrow">▼</span></button>
+          <button class="col-btn" data-col="4"><span class="col-badge" id="col-badge-4"></span><span class="col-arrow">▼</span></button>
+          <button class="col-btn" data-col="5"><span class="col-badge" id="col-badge-5"></span><span class="col-arrow">▼</span></button>
+          <button class="col-btn" data-col="6"><span class="col-badge" id="col-badge-6"></span><span class="col-arrow">▼</span></button>
         </div>
 
         <!-- Physical Board Container -->
@@ -177,8 +192,79 @@
         </div>
       </section>
 
-      <!-- Right Panel: Match Statistics & Algorithm Live Info -->
+      <!-- Right Panel: Tutor, Match Statistics & Algorithm Live Info -->
       <aside class="panel right-panel">
+        
+        <!-- KI-Tutor Card (visible when Learn Mode is ON) -->
+        <div class="card tutor-card" id="tutor-card" style="display: none;">
+          <div class="tutor-header">
+            <div class="tutor-profile">
+              <div class="tutor-avatar">🎓</div>
+              <div class="tutor-title-box">
+                <h2>KI-Tutor Prof. Vier</h2>
+                <span class="tutor-subtitle">Taktik- & Strategie-Coach</span>
+              </div>
+            </div>
+            <span class="tutor-live-pulse" title="Tutor analysiert das Spielfeld in Echtzeit">● LIVE</span>
+          </div>
+
+          <!-- Coach Speech Bubble -->
+          <div class="coach-bubble" id="coach-bubble">
+            <div class="bubble-header">
+              <span id="coach-mood-icon">💡</span>
+              <strong id="coach-mood-title">Taktische Lage</strong>
+            </div>
+            <p id="coach-text">Willkommen! Ich analysiere das Spiel live. Fahre mit der Maus über die Spalten oder sieh dir meine Tipps an.</p>
+          </div>
+
+          <!-- Best Move Highlight Box -->
+          <div class="best-move-container" id="best-move-container">
+            <span class="section-label">Empfohlener Zug:</span>
+            <div class="best-move-badge" id="best-move-badge">
+              <div class="best-move-main">
+                <span class="best-move-col" id="best-move-col">Spalte 4</span>
+                <span class="best-move-tag" id="best-move-tag">Top-Empfehlung</span>
+              </div>
+              <p class="best-move-reason" id="best-move-reason">Zentrumskontrolle: Eröffnet die meisten 4er-Kombinationen.</p>
+            </div>
+          </div>
+
+          <!-- Column Evaluator Accordion / List -->
+          <div class="tutor-columns-overview">
+            <span class="section-label">Spalten-Analyse (Fahre mit Maus drüber):</span>
+            <div class="tutor-col-list" id="tutor-col-list">
+              <!-- Dynamisch durch JS befüllt -->
+            </div>
+          </div>
+
+          <!-- Strategy Section & Modal Trigger -->
+          <div class="tutor-strategy-box">
+            <div class="strategy-tip-header">
+              <span>🎯 Strategie-Impuls</span>
+            </div>
+            <p id="tutor-strategy-tip" class="strategy-tip-text">
+              Die Spalte 4 in der Mitte ist das Herzstück des Spiels. Wer das Zentrum beherrscht, diktiert das Geschehen!
+            </p>
+            <button id="btn-open-strategies" class="btn btn-secondary btn-sm full-width">
+              <span>📚 6 Grundstrategien lernen</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Tutor Teaser Card (visible when Learn Mode is OFF) -->
+        <div class="card tutor-teaser-card" id="tutor-teaser-card">
+          <div class="teaser-content">
+            <div class="teaser-icon">🎓</div>
+            <div class="teaser-text">
+              <strong>KI-Lernmodus</strong>
+              <small>Lerne Meisterstrategien, Vorlagen-Vermeidung & Gabeln mit Live-Coach Prof. Vier!</small>
+            </div>
+          </div>
+          <button id="btn-activate-learn" class="btn btn-primary full-width" style="margin-top: 10px;">
+            <span>🎓 Lernmodus aktivieren</span>
+          </button>
+        </div>
+
         <div class="card stats-card">
           <h2>Match-Statistik</h2>
           <div class="stat-row">
@@ -273,6 +359,166 @@
       </div>
     </div>
 
+    <!-- Modal: Strategy Academy (Grundstrategien) -->
+    <div class="modal-backdrop" id="strategy-modal" style="display: none;">
+      <div class="modal-card strategy-modal-card">
+        <div class="modal-header">
+          <div class="modal-header-title">
+            <span class="academy-badge">🎓 AKADEMIE</span>
+            <h2>Die 6 goldenen Vier-Gewinnt Grundstrategien</h2>
+          </div>
+          <button class="close-btn" id="btn-close-strategy-modal">&times;</button>
+        </div>
+        <div class="modal-body strategy-modal-body">
+          <p class="academy-intro">
+            Vier Gewinnt ist kein reines Zufallsspiel, sondern ein <strong>mathematisch gelöstes Strategiespiel</strong>. 
+            Mit diesen 6 Grundregeln unseres KI-Tutors wirst du deine Spielstärke sofort dramatisch steigern!
+          </p>
+
+          <div class="strategies-grid">
+            <!-- 1. Zentrumskontrolle -->
+            <div class="strategy-card">
+              <div class="strategy-card-header">
+                <span class="strategy-num">1</span>
+                <div class="strategy-meta">
+                  <span class="strategy-tag opening">Eröffnung</span>
+                  <h3>Die Macht der Mitte (Zentrumskontrolle)</h3>
+                </div>
+                <span class="strategy-icon">🎯</span>
+              </div>
+              <p>
+                Von den 69 möglichen Viererketten laufen <strong>16 Linien direkt durch die mittlere Spalte 4</strong>. 
+                Am Außenrand (Spalte 1 und 7) sind es nur jeweils 3 Linien! Wer die Mitte besitzt, kontrolliert das Spiel.
+              </p>
+              <div class="strategy-mini-board center-preview">
+                <div class="mini-col">3</div>
+                <div class="mini-col">7</div>
+                <div class="mini-col">13</div>
+                <div class="mini-col active-center">16 ★</div>
+                <div class="mini-col">13</div>
+                <div class="mini-col">7</div>
+                <div class="mini-col">3</div>
+              </div>
+              <div class="pro-tip">
+                <strong>💡 Profi-Tipp:</strong> Wenn du als Rot beginnst, spiele deinen allerersten Stein IMMER in Spalte 4!
+              </div>
+            </div>
+
+            <!-- 2. Keine Vorlagen liefern -->
+            <div class="strategy-card">
+              <div class="strategy-card-header">
+                <span class="strategy-num">2</span>
+                <div class="strategy-meta">
+                  <span class="strategy-tag defense">Verteidigung</span>
+                  <h3>Die goldene Regel: Keine Vorlagen!</h3>
+                </div>
+                <span class="strategy-icon">⚠️</span>
+              </div>
+              <p>
+                Der häufigste Anfängerfehler ist die unbedachte <strong>Vorlage (Blunder)</strong>. Du wirfst ein, und dein Stein 
+                dient dem Gegner als Treppe, um sofort auf das Feld darüber zu setzen und 4-in-einer-Reihe zu gewinnen!
+              </p>
+              <div class="strategy-illustration blunder-illustration">
+                <div class="blunder-step step-bad">
+                  <span>Dein Zug: Stein fällt</span>
+                  <div class="mini-disc disc-red"></div>
+                </div>
+                <div class="arrow-right">➔</div>
+                <div class="blunder-step step-fatal">
+                  <span>Gegner setzt darüber: GEWINN!</span>
+                  <div class="mini-disc disc-yellow warning-glow"></div>
+                </div>
+              </div>
+              <div class="pro-tip">
+                <strong>💡 Profi-Tipp:</strong> Frage dich vor JEDEM Zug: <em>"Was passiert, wenn der Gegner genau auf meinen Stein draufsetzt?"</em>
+              </div>
+            </div>
+
+            <!-- 3. Doppelbedrohungen / Gabeln -->
+            <div class="strategy-card">
+              <div class="strategy-card-header">
+                <span class="strategy-num">3</span>
+                <div class="strategy-meta">
+                  <span class="strategy-tag tactic">Taktik</span>
+                  <h3>Die Gabel (Doppelbedrohung / Fork)</h3>
+                </div>
+                <span class="strategy-icon">⚡</span>
+              </div>
+              <p>
+                Erzeuge mit einem einzigen Stein ZWEI getrennte Gewinnfelder gleichzeitig. Da der Gegner pro Runde nur 
+                einen einzigen Stein einwerfen kann, kann er nur eine Bedrohung abwehren – die andere gewinnt das Spiel!
+              </p>
+              <div class="pro-tip">
+                <strong>💡 Profi-Tipp:</strong> Kombiniere diagonale und horizontale Linien, die sich in einem gemeinsamen Stein kreuzen.
+              </div>
+            </div>
+
+            <!-- 4. Offene Dreierketten & Präventiv-Block -->
+            <div class="strategy-card">
+              <div class="strategy-card-header">
+                <span class="strategy-num">4</span>
+                <div class="strategy-meta">
+                  <span class="strategy-tag attack">Angriff & Abwehr</span>
+                  <h3>Offene Dreierketten & Präventiv-Block</h3>
+                </div>
+                <span class="strategy-icon">🌟</span>
+              </div>
+              <p>
+                Drei Steine mit ZWEI offenen Enden (z. B. <code>_ O O O _</code>) sind unaufhaltbar: 
+                Egal welches Ende du blockst, der Gegner gewinnt am anderen! Du stehst vor zwei Totenköpfen.
+              </p>
+              <div class="pro-tip">
+                <strong>💡 Profi-Tipp (Präventiv-Block):</strong> Warte niemals, bis der 3. Stein liegt! 
+                Blockiere eine offene Kette bereits, wenn der Gegner <strong>zwei Steine</strong> hat (Präventiv-Block mit 88% Bewertung), 
+                um die tödliche Doppelbedrohung im Keim zu ersticken!
+              </div>
+            </div>
+
+            <!-- 5. Paritäts-Regel -->
+            <div class="strategy-card">
+              <div class="strategy-card-header">
+                <span class="strategy-num">5</span>
+                <div class="strategy-meta">
+                  <span class="strategy-tag mastery">Meisterklasse</span>
+                  <h3>Die Paritäts-Regel (Gerade vs. Ungerade)</h3>
+                </div>
+                <span class="strategy-icon">📏</span>
+              </div>
+              <p>
+                Jede Spalte hat 6 Zeilen. Spieler 1 (Rot) profitiert von <strong>ungeraden Zeilen (1, 3, 5)</strong>, 
+                weil Rot immer den ersten Stein in einer neuen Zeile legt. Spieler 2 (Gelb) profitiert von <strong>geraden Zeilen (2, 4, 6)</strong>.
+              </p>
+              <div class="pro-tip">
+                <strong>💡 Profi-Tipp:</strong> Baue als Rot deine Drohungen gezielt auf ungeraden Zeilen auf; als Gelb auf geraden!
+              </div>
+            </div>
+
+            <!-- 6. Vertikale Fallen & Zugzwang -->
+            <div class="strategy-card">
+              <div class="strategy-card-header">
+                <span class="strategy-num">6</span>
+                <div class="strategy-meta">
+                  <span class="strategy-tag endgame">Endspiel</span>
+                  <h3>Vertikale Fallen & Zugzwang</h3>
+                </div>
+                <span class="strategy-icon">🧱</span>
+              </div>
+              <p>
+                Brauchst du ein Feld in der Luft, das noch keine Basis hat? Rühre diese Spalte nicht an! 
+                Spiele neutral in anderen Spalten weiter, bis der Gegner keine Ausweichmöglichkeiten mehr hat und die Stufe für dich bauen MUSS.
+              </p>
+              <div class="pro-tip">
+                <strong>💡 Profi-Tipp:</strong> Geduld ist eine Tugend. Zwinge den Gegner durch Zugzwang in den Fehler!
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary" id="btn-close-strategy-footer">Alles klar, zurück zum Spiel</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Win / Game Over Overlay -->
     <div class="overlay" id="gameover-overlay" style="display: none;">
       <div class="gameover-card">
@@ -289,6 +535,7 @@
 
   <!-- Scripts -->
   <script src="ai.js"></script>
+  <script src="tutor.js"></script>
   <script src="game.js"></script>
 </body>
 </html>

@@ -17,11 +17,48 @@ Es wird **keine Installation von Node.js oder Python** benötigt! Das Spiel läu
 ## 🎮 Spielmodi & Features
 
 * **1 Spieler vs. Computer (KI):** Spiele gegen die KI mit 4 frei wählbaren Spielstärken.
+* **🎓 Interaktiver KI-Lernmodus:** Schalte jederzeit einen virtuellen Taktik-Coach ("Prof. Vier") zu, der deine Züge live bewertet und Fehler visualisiert.
 * **2 Spieler (Hotseat):** Spiele lokal mit einem Freund am selben Bildschirm.
 * **Zug zurücknehmen (Undo):** Fehler gemacht? Nimm deinen Zug mit einem Klick zurück.
 * **Live-Statistiken:** Zählt Siege, Niederlagen, Unentschieden und Züge pro Runde.
 * **Synthesizer-Soundeffekte:** Dynamische Sounds über die Web Audio API (keine externen Sounddateien nötig, stummschaltbar).
 * **Gewinn-Hervorhebung:** Die 4 siegreichen Steine pulsieren strahlend auf dem Brett.
+
+---
+
+## 🎓 Der KI-Lernmodus & Taktik-Coach (Prof. Vier)
+
+Der Lernmodus kann jederzeit im Header über den Button **„🎓 Lernmodus: AN/AUS“** oder mit der Taste **`L`** ein- und ausgeschaltet werden.
+
+### Was macht der KI-Tutor während des Spiels?
+
+1. **Lückenlose Live-Bewertung aller Züge (0% bis 100% Skala):**
+   * Jeder legale Zug wird streng nach den Konsequenzen des nächsten Gegenzugs bewertet:
+     * 👑 **100% — Siegzug:** Vollendet sofort die eigene 4er-Kette zum Gewinn.
+     * 🛡️ **95% — Pflicht-Rettung:** Der einzige Zug, der die drohende Niederlage abwendet!
+     * ⚡ **90% — Gabel:** Erzeugt zwei Gewinnchancen gleichzeitig (unausweichlicher Sieg).
+     * 🌟 **82% — Offene 3er:** Baut eine Dreierkette mit zwei offenen Enden auf.
+     * ⭐ **75% — Zentrum:** Kontrolliert die spielentscheidende Spalte 4.
+     * 👍 **65% — Solide:** Sicherer Aufbauzug ohne gegnerische Vorlage.
+     * 🟡 **50% — Passabel:** Flankenzug mit mäßigem Einfluss.
+     * ⚠️ **28%–38% — Schwach / Rand:** Wenig Raumgewinn oder passiver Außenrandzug.
+     * 💀 **0% — Tödlicher Fehler (Sofortige Niederlage):** Wenn der Gegner im nächsten Zug gewinnen kann, werden **alle anderen Züge ausnahmslos als 0% / Niederlage** gekennzeichnet, da sie den gegnerischen Sieg nicht verhindern! Ebenso werden direkte Vorlagen (Blunder) mit 0% bewertet.
+2. **Spielfeld-Visualisierung in Echtzeit:**
+   * Fahre mit der Maus über eine Spalte:
+     * Ein transparenter **Ghost-Chip** zeigt genau, wo dein Stein landen wird (inkl. Prozentnote und Icon).
+     * **Ungeblockte Drohungen:** Wenn ein Zug den gegnerischen Sieg nicht verhindert, blinkt die gegnerische Gewinnspalte drüben rot auf mit **`⚠️ UNGEBLOCKTER GEGNER-SIEG IN SPALTE X!`** und die 4er-Linie pulsiert feuerrot.
+     * **Blunder-Visualisierung:** Droht eine Vorlage in derselben Spalte, blinkt das Feld direkt darüber mit **`⚠️ GEGNER-SIEG!`**.
+     * **Verteidigungs-Visualisierung:** Bei einem Pflichtblock leuchten die 3 gegnerischen Steine auf, die du gerade abwehrst.
+3. **Ausführliche Erklärungen:**
+   * In der **Tutor-Quickbar** über dem Spielfeld und in der **Coach-Sprechblase** erklärt Prof. Vier didaktisch fundiert und motivierend, welche Motive hinter den Zügen stecken.
+4. **Die 6 goldenen Grundstrategien (Akademie-Lexikon):**
+   * Über den Button **„📚 6 Grundstrategien lernen“** öffnet sich ein interaktives Taktik-Kompendium:
+     1. **Die Macht der Mitte (Zentrumskontrolle):** 16 Gewinnlinien durch Spalte 4 vs. nur 3 am Rand.
+     2. **Keine Vorlagen liefern:** Das Feld direkt über dem eigenen Stein vor jedem Wurf scannen.
+     3. **Die Gabel (Doppelbedrohung):** Zwei Siegmöglichkeiten gleichzeitig erzwingen.
+     4. **Offene Dreierketten:** Reihen mit beidseitig offenen Enden aufbauen.
+     5. **Die Paritäts-Regel:** Rot nutzt ungerade Zeilen (1, 3, 5), Gelb gerade Zeilen (2, 4, 6).
+     6. **Vertikale Fallen & Zugzwang:** Den Gegner zwingen, die Stufe für den eigenen Siegstein zu errichten.
 
 ---
 
@@ -76,10 +113,11 @@ Normalerweise wächst der Suchbaum rasant an ($7^{\text{Tiefe}}$). Bei 7 Zügen 
 
 ```
 ag_4gewinnt/
-├── index.html       # Benutzeroberfläche, Spielfeld & Modals
-├── style.css        # Modernes Arcade/Glassmorphism Design & CSS-Animationen
+├── index.html       # Benutzeroberfläche, Spielfeld, Tutor-Quickbar & Modals
+├── style.css        # Modernes Arcade/Glassmorphism Design, Tutor-Styles & Animationen
 ├── ai.js            # Minimax-Algorithmus mit Alpha-Beta-Pruning & Heuristik
-├── game.js          # Spielmechanik, Web Audio Sounds, Undo & Event-Handler
+├── tutor.js         # KI-Tutor Engine: Zug-Analysen, Vorlagen-Erkennung & Grundstrategien
+├── game.js          # Spielmechanik, Web Audio Sounds, Undo & Tutor-Controller
 ├── start_spiel.bat  # Start-Verknüpfung per Doppelklick
 └── README.md        # Detaillierte Dokumentation
 ```
