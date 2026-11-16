@@ -937,6 +937,12 @@ body {
   flex-shrink: 0;
 }
 
+.gameover-banner-actions .btn {
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
 .btn-glow {
   box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
   animation: glowPulse 2s infinite ease-in-out;
@@ -995,9 +1001,11 @@ body {
   .gameover-banner-actions {
     justify-content: center;
     width: 100%;
+    flex-wrap: wrap;
   }
-  .gameover-banner-actions #btn-play-again {
+  .gameover-banner-actions .btn {
     flex: 1;
+    min-width: 110px;
   }
 }
 

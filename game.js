@@ -197,6 +197,8 @@ class ConnectFourGame {
     this.winnerTitleEl = document.getElementById('winner-title');
     this.winnerSubEl = document.getElementById('winner-sub');
     this.btnDismissBanner = document.getElementById('btn-dismiss-banner');
+    this.btnBannerUndoEl = document.getElementById('btn-banner-undo');
+    this.btnUndoEl = document.getElementById('btn-undo');
     this.boardFrameEl = document.querySelector('.board-frame');
 
     this.btnSoundEl = document.getElementById('btn-sound');
@@ -312,6 +314,13 @@ class ConnectFourGame {
       });
     }
 
+    const btnBannerUndo = document.getElementById('btn-banner-undo');
+    if (btnBannerUndo) {
+      btnBannerUndo.addEventListener('click', () => {
+        this.undoLastMove();
+      });
+    }
+
     document.getElementById('btn-undo').addEventListener('click', () => this.undoLastMove());
 
     // Sound Button
@@ -339,10 +348,17 @@ class ConnectFourGame {
       this.btnActivateLearn.addEventListener('click', () => this.toggleLearnMode(true));
     }
 
-    // Tastenkürzel 'L' für schnelles Umschalten des Lernmodus
+    // Tastenkürzel ('L' für Lernmodus, 'Ctrl+Z' oder 'U' für Zug zurück)
     window.addEventListener('keydown', (e) => {
       if ((e.key === 'l' || e.key === 'L') && !e.target.matches('input, textarea')) {
         this.toggleLearnMode();
+      }
+      if ((e.key === 'z' || e.key === 'Z') && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        this.undoLastMove();
+      }
+      if ((e.key === 'u' || e.key === 'U') && !e.target.matches('input, textarea') && !e.ctrlKey && !e.metaKey) {
+        this.undoLastMove();
       }
     });
 
@@ -658,10 +674,55 @@ class ConnectFourGame {
   }
 
   undoLastMove() {
-    if (this.history.length === 0 || this.gameOver || this.isAiTurn) return;
+    if (this.history.length === 0 || this.isAiTurn) return;
 
-    // Im PvC Modus: Nimm 2 Züge zurück (KI + Mensch), es sei denn Mensch hat gerade verloren
-    const stepsToUndo = (this.gameMode === 'pvc' && this.history.length >= 2) ? 2 : 1;
+    const wasGameOver = this.gameOver;
+    const prevWinner = this.winner;
+
+    // Falls das Spiel beendet war: Status zurücksetzen und Rundenzähler anpassen
+    if (wasGameOver) {
+      if (this.stats.rounds > 0) this.stats.rounds--;
+      if (prevWinner === 1 && this.stats.p1Wins > 0) {
+        this.stats.p1Wins--;
+      } else if (prevWinner === 2 && this.stats.p2Wins > 0) {
+        this.stats.p2Wins--;
+      } else if (prevWinner === 0 && this.stats.draws > 0) {
+        this.stats.draws--;
+      }
+
+      this.gameOver = false;
+      this.winner = null;
+      this.winningLine = null;
+
+      if (this.gameOverOverlayEl) {
+        this.gameOverOverlayEl.style.display = 'none';
+      }
+      if (this.colSelectorsEl) {
+        this.colSelectorsEl.style.display = 'grid';
+      }
+      if (this.boardFrameEl) {
+        this.boardFrameEl.classList.remove('game-over-active');
+      }
+    }
+
+    // Schritte ermitteln:
+    // Im PvC-Modus:
+    // - Wenn Spieler 1 (Mensch) gewonnen hat, wurde nur 1 Zug (sein Siegeszug) gemacht -> 1 Schritt zurück.
+    // - Wenn die KI gewonnen hat (oder unentschieden/mitten im Spiel): 2 Züge zurück (KI-Zug + menschlicher Zug),
+    //   damit der menschliche Spieler wieder am Zug ist und den Fehler korrigieren kann.
+    // Im PvP-Modus: immer genau 1 Zug zurück.
+    let stepsToUndo = 1;
+    if (this.gameMode === 'pvc') {
+      if (wasGameOver && prevWinner === 1) {
+        stepsToUndo = 1;
+      } else if (this.history.length >= 2) {
+        stepsToUndo = 2;
+      } else {
+        stepsToUndo = 1;
+      }
+    } else {
+      stepsToUndo = 1;
+    }
 
     for (let i = 0; i < stepsToUndo; i++) {
       if (this.history.length > 0) {
@@ -672,10 +733,18 @@ class ConnectFourGame {
       }
     }
 
+    this.sound.playPop();
     this.renderBoard();
     this.updateUI();
     this.clearMovePreview();
     this.updateTutorUI();
+
+    // Feedback im Tutor-Quickbar
+    if (this.learnMode && this.tutorQuickMsg) {
+      this.tutorQuickMsg.innerHTML = wasGameOver 
+        ? '<strong>Zug zurückgenommen!</strong> Die Gewinnstellung wurde aufgehoben. Analysiere das Brett und versuche einen anderen Zug!' 
+        : '<strong>Zug zurückgenommen.</strong> Du bist wieder am Zug!';
+    }
   }
 
   updateUI() {
@@ -720,6 +789,10 @@ class ConnectFourGame {
     this.updateAlgoDepthDisplay();
     this.updateColButtons();
     this.updatePopOutButtons();
+
+    const canUndo = this.history.length > 0 && !this.isAiTurn;
+    if (this.btnUndoEl) this.btnUndoEl.disabled = !canUndo;
+    if (this.btnBannerUndoEl) this.btnBannerUndoEl.disabled = !canUndo;
   }
 
   updateAlgoDepthDisplay() {
