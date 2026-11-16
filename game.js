@@ -133,6 +133,7 @@ class ConnectFourGame {
     this.gameMode = 'pvc';  // 'pvc' oder 'pvp'
     this.difficulty = 2;    // 1-4
     this.gameOver = false;
+    this.winner = null;
     this.isAiTurn = false;
     this.winningLine = null;
     this.history = [];      // Für Undo
@@ -195,6 +196,8 @@ class ConnectFourGame {
     this.winnerIconEl = document.getElementById('winner-icon');
     this.winnerTitleEl = document.getElementById('winner-title');
     this.winnerSubEl = document.getElementById('winner-sub');
+    this.btnDismissBanner = document.getElementById('btn-dismiss-banner');
+    this.boardFrameEl = document.querySelector('.board-frame');
 
     this.btnSoundEl = document.getElementById('btn-sound');
     this.soundIconEl = document.getElementById('sound-icon');
@@ -293,10 +296,22 @@ class ConnectFourGame {
 
     // Buttons: Neu, Undo, Regeln
     document.getElementById('btn-restart').addEventListener('click', () => this.restartGame());
-    document.getElementById('btn-play-again').addEventListener('click', () => {
-      this.gameOverOverlayEl.style.display = 'none';
-      this.restartGame();
-    });
+    
+    const btnPlayAgain = document.getElementById('btn-play-again');
+    if (btnPlayAgain) {
+      btnPlayAgain.addEventListener('click', () => {
+        this.restartGame();
+      });
+    }
+
+    if (this.btnDismissBanner) {
+      this.btnDismissBanner.addEventListener('click', () => {
+        if (this.gameOverOverlayEl) {
+          this.gameOverOverlayEl.style.display = 'none';
+        }
+      });
+    }
+
     document.getElementById('btn-undo').addEventListener('click', () => this.undoLastMove());
 
     // Sound Button
@@ -387,10 +402,22 @@ class ConnectFourGame {
     this.board = this.createEmptyBoard();
     this.currentPlayer = 1;
     this.gameOver = false;
+    this.winner = null;
     this.isAiTurn = false;
     this.winningLine = null;
     this.history = [];
     this.stats.currentMoves = 0;
+
+    // Game Over Banner ausblenden & Drop-Spalten wieder einblenden
+    if (this.gameOverOverlayEl) {
+      this.gameOverOverlayEl.style.display = 'none';
+    }
+    if (this.colSelectorsEl) {
+      this.colSelectorsEl.style.display = 'grid';
+    }
+    if (this.boardFrameEl) {
+      this.boardFrameEl.classList.remove('game-over-active');
+    }
 
     // Hindernisse platzieren (falls aktiv)
     this.obstacles = [];
@@ -576,23 +603,34 @@ class ConnectFourGame {
 
   handleGameOver(winner) {
     this.gameOver = true;
+    this.winner = winner;
     this.stats.rounds++;
 
     if (winner === 1) {
       this.stats.p1Wins++;
       this.winningLine = this.ai.findWinningLine(this.board);
       this.sound.playWin();
-      this.showGameOverModal('🏆', 'Rot hat gewonnen!', 'Hervorragend gespielt!');
+      this.showGameOverModal('🏆', 'Rot hat gewonnen!', 'Hervorragend gespielt! Analysiere das Spielfeld in Ruhe.', 'win-p1');
     } else if (winner === 2) {
       this.stats.p2Wins++;
       this.winningLine = this.ai.findWinningLine(this.board);
       this.sound.playWin();
       const p2Label = this.gameMode === 'pvc' ? 'Die KI (Gelb)' : 'Gelb';
-      this.showGameOverModal('🤖', `${p2Label} hat gewonnen!`, 'Ein genialer Schachzug der KI.');
+      const sub = this.gameMode === 'pvc' 
+        ? 'Ein genialer Schachzug der KI. Analysiere das Spielfeld in Ruhe.' 
+        : 'Gelb hat 4 Steine in einer Reihe! Analysiere das Spielfeld in Ruhe.';
+      this.showGameOverModal('🤖', `${p2Label} hat gewonnen!`, sub, 'win-p2');
     } else {
       this.stats.draws++;
       this.sound.playDraw();
-      this.showGameOverModal('🤝', 'Unentschieden!', 'Das gesamte Spielfeld ist voll.');
+      this.showGameOverModal('🤝', 'Unentschieden!', 'Das gesamte Spielfeld ist voll besetzt.', 'win-draw');
+    }
+
+    if (this.colSelectorsEl) {
+      this.colSelectorsEl.style.display = 'none';
+    }
+    if (this.boardFrameEl) {
+      this.boardFrameEl.classList.add('game-over-active');
     }
 
     this.renderBoard();
@@ -601,13 +639,14 @@ class ConnectFourGame {
     this.updateTutorUI();
   }
 
-  showGameOverModal(icon, title, subtitle) {
+  showGameOverModal(icon, title, subtitle, winClass = '') {
     this.winnerIconEl.textContent = icon;
     this.winnerTitleEl.textContent = title;
     this.winnerSubEl.textContent = subtitle;
+    this.gameOverOverlayEl.className = `gameover-banner ${winClass}`.trim();
     setTimeout(() => {
       this.gameOverOverlayEl.style.display = 'flex';
-    }, 600);
+    }, 450);
   }
 
   saveHistoryState() {
@@ -641,14 +680,33 @@ class ConnectFourGame {
 
   updateUI() {
     // HUD
-    if (this.currentPlayer === 1) {
-      this.p1HudEl.classList.add('active');
-      this.p2HudEl.classList.remove('active');
-      this.turnTextEl.textContent = 'Rot ist am Zug';
+    if (this.gameOver) {
+      if (this.winner === 1) {
+        this.p1HudEl.classList.add('active', 'winner-glow');
+        this.p2HudEl.classList.remove('active', 'winner-glow');
+        this.turnTextEl.textContent = '🏆 Rot hat gewonnen!';
+      } else if (this.winner === 2) {
+        this.p2HudEl.classList.add('active', 'winner-glow');
+        this.p1HudEl.classList.remove('active', 'winner-glow');
+        const p2Label = this.gameMode === 'pvc' ? 'Computer' : 'Gelb';
+        this.turnTextEl.textContent = `🤖 ${p2Label} hat gewonnen!`;
+      } else {
+        this.p1HudEl.classList.remove('active', 'winner-glow');
+        this.p2HudEl.classList.remove('active', 'winner-glow');
+        this.turnTextEl.textContent = '🤝 Unentschieden!';
+      }
     } else {
-      this.p1HudEl.classList.remove('active');
-      this.p2HudEl.classList.add('active');
-      this.turnTextEl.textContent = this.gameMode === 'pvc' ? 'Computer ist am Zug' : 'Gelb ist am Zug';
+      this.p1HudEl.classList.remove('winner-glow');
+      this.p2HudEl.classList.remove('winner-glow');
+      if (this.currentPlayer === 1) {
+        this.p1HudEl.classList.add('active');
+        this.p2HudEl.classList.remove('active');
+        this.turnTextEl.textContent = 'Rot ist am Zug';
+      } else {
+        this.p1HudEl.classList.remove('active');
+        this.p2HudEl.classList.add('active');
+        this.turnTextEl.textContent = this.gameMode === 'pvc' ? 'Computer ist am Zug' : 'Gelb ist am Zug';
+      }
     }
 
     this.p1ScoreEl.textContent = `${this.stats.p1Wins} Siege`;
@@ -688,8 +746,8 @@ class ConnectFourGame {
     const buttons = this.popoutButtonsEl.querySelectorAll('.pop-btn');
     buttons.forEach((btn, col) => {
       const bottomCell = this.board[this.ROWS - 1][col];
-      // Nur aktiv, wenn der unterste Stein dem aktuellen Spieler gehört
-      const canPop = (bottomCell === this.currentPlayer);
+      // Nur aktiv, wenn der unterste Stein dem aktuellen Spieler gehört und Spiel läuft
+      const canPop = (bottomCell === this.currentPlayer) && !this.gameOver;
       btn.disabled = !canPop;
     });
   }
@@ -737,9 +795,18 @@ class ConnectFourGame {
 
     if (this.gameOver) {
       if (this.coachMoodIcon) this.coachMoodIcon.textContent = '🏁';
-      if (this.coachMoodTitle) this.coachMoodTitle.textContent = 'Spiel beendet';
-      if (this.coachText) this.coachText.textContent = 'Die Partie ist vorbei! Klicke auf "Neues Spiel", um das nächste Taktik-Training zu starten.';
-      if (this.tutorQuickMsg) this.tutorQuickMsg.innerHTML = '<strong>Partie beendet.</strong> Bereit für die nächste Runde?';
+      if (this.coachMoodTitle) this.coachMoodTitle.textContent = 'Partie beendet';
+      if (this.winner === 1) {
+        if (this.coachText) this.coachText.textContent = 'Glückwunsch! Deine 4er-Reihe leuchtet auf dem Spielfeld. Schau dir die Stellung in Ruhe an und klicke auf "Neues Spiel", sobald du bereit bist.';
+        if (this.tutorQuickMsg) this.tutorQuickMsg.innerHTML = '<strong>Sieg für Rot!</strong> Die 4er-Reihe leuchtet auf dem Brett. Schau dir das Spielfeld in Ruhe an.';
+      } else if (this.winner === 2) {
+        const kiName = this.gameMode === 'pvc' ? 'Die KI' : 'Gelb';
+        if (this.coachText) this.coachText.textContent = `${kiName} hat 4 Steine in eine Reihe gebracht (siehe leuchtende Steine). Untersuche in Ruhe auf dem Brett, wo der entscheidende Zug lag!`;
+        if (this.tutorQuickMsg) this.tutorQuickMsg.innerHTML = `<strong>${kiName} hat gewonnen!</strong> Die 4er-Reihe leuchtet auf dem Spielfeld — analysiere die Stellung in Ruhe.`;
+      } else {
+        if (this.coachText) this.coachText.textContent = 'Unentschieden! Das Spielfeld ist komplett besetzt. Klicke auf "Neues Spiel" für die nächste Runde.';
+        if (this.tutorQuickMsg) this.tutorQuickMsg.innerHTML = '<strong>Unentschieden!</strong> Volles Spielfeld. Klicke auf "Neues Spiel" für die nächste Runde.';
+      }
       this.clearColBadges();
       return;
     }

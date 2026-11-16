@@ -159,6 +159,28 @@
           </div>
         </div>
 
+        <!-- Game Over Banner (sofort sichtbar über dem Brett, Spielfeld bleibt vollständig sichtbar) -->
+        <div class="gameover-banner" id="gameover-overlay" style="display: none;">
+          <div class="gameover-banner-content">
+            <div class="winner-icon-wrap">
+              <span class="winner-icon" id="winner-icon">🏆</span>
+            </div>
+            <div class="winner-info">
+              <div class="winner-header-row">
+                <h2 id="winner-title">Rot hat gewonnen!</h2>
+                <span class="winner-tag" id="winner-tag">Partie beendet</span>
+              </div>
+              <p id="winner-sub">Hervorragend gespielt! Schau dir das Spielfeld in Ruhe an.</p>
+            </div>
+          </div>
+          <div class="gameover-banner-actions">
+            <button id="btn-play-again" class="btn btn-primary btn-glow" title="Neues Spiel starten und Brett leeren">
+              <span>🔄 Neues Spiel</span>
+            </button>
+            <button id="btn-dismiss-banner" class="btn-dismiss" title="Meldung schließen (Spielfeld bleibt sichtbar)" aria-label="Schließen">✕</button>
+          </div>
+        </div>
+
         <!-- Column Drop Hover Indicators -->
         <div class="column-selectors" id="column-selectors">
           <button class="col-btn" data-col="0"><span class="col-badge" id="col-badge-0"></span><span class="col-arrow">▼</span></button>
@@ -515,18 +537,6 @@
         </div>
         <div class="modal-footer">
           <button class="btn btn-primary" id="btn-close-strategy-footer">Alles klar, zurück zum Spiel</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Win / Game Over Overlay -->
-    <div class="overlay" id="gameover-overlay" style="display: none;">
-      <div class="gameover-card">
-        <div class="winner-icon" id="winner-icon">🏆</div>
-        <h2 id="winner-title">Rot hat gewonnen!</h2>
-        <p id="winner-sub">Herzlichen Glückwunsch!</p>
-        <div class="overlay-buttons">
-          <button id="btn-play-again" class="btn btn-primary">Nochmal spielen</button>
         </div>
       </div>
     </div>
