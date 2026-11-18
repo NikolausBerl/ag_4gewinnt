@@ -17,9 +17,10 @@ Es wird **keine Installation von Node.js oder Python** benötigt! Das Spiel läu
 ## 🎮 Spielmodi & Features
 
 * **1 Spieler vs. Computer (KI):** Spiele gegen die KI mit 4 frei wählbaren Spielstärken.
-* **🎓 Interaktiver KI-Lernmodus:** Schalte jederzeit einen virtuellen Taktik-Coach ("Prof. Vier") zu, der deine Züge live bewertet und Fehler visualisiert.
+* **🎓 Interaktiver KI-Lernmodus:** Schalte jederzeit einen virtuellen Taktik-Coach ("Prof. Vier" / "Prof. Quatre") zu, der deine Züge live bewertet und Fehler visualisiert.
+* **🌐 Zweisprachig (Deutsch / Französisch):** Direkte Sprachumschaltung für alle Spielbereiche, Taktiken, Analysen und Regeln.
+* **⏮️ Zug-Wiederholung (Undo/Redo):** Vor- und Zurückgehen Stein für Stein bis zum ersten Zug, inklusive optischer Vorschau des besten Zugs (`💡 Bester Zug`) und klarer Farbkennzeichnung, wer am Zug ist.
 * **2 Spieler (Hotseat):** Spiele lokal mit einem Freund am selben Bildschirm.
-* **Zug zurücknehmen (Undo):** Fehler gemacht? Nimm deinen Zug mit einem Klick zurück.
 * **Live-Statistiken:** Zählt Siege, Niederlagen, Unentschieden und Züge pro Runde.
 * **Synthesizer-Soundeffekte:** Dynamische Sounds über die Web Audio API (keine externen Sounddateien nötig, stummschaltbar).
 * **Gewinn-Hervorhebung:** Die 4 siegreichen Steine pulsieren strahlend auf dem Brett.
@@ -115,9 +116,11 @@ Normalerweise wächst der Suchbaum rasant an ($7^{\text{Tiefe}}$). Bei 7 Zügen 
 ag_4gewinnt/
 ├── index.html       # Benutzeroberfläche, Spielfeld, Tutor-Quickbar & Modals
 ├── style.css        # Modernes Arcade/Glassmorphism Design, Tutor-Styles & Animationen
+├── i18n.js          # Zweisprachiges i18n Modul (Deutsch / Französisch)
 ├── ai.js            # Minimax-Algorithmus mit Alpha-Beta-Pruning & Heuristik
 ├── tutor.js         # KI-Tutor Engine: Zug-Analysen, Vorlagen-Erkennung & Grundstrategien
 ├── game.js          # Spielmechanik, Web Audio Sounds, Undo & Tutor-Controller
+├── deploy.bat       # 1-Klick Deployment zu IONOS Webhost
 ├── start_spiel.bat  # Start-Verknüpfung per Doppelklick
 └── README.md        # Detaillierte Dokumentation
 ```

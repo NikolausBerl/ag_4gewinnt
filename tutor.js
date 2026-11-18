@@ -9,97 +9,85 @@ const STRATEGY_LESSONS = [
   {
     id: 'center-control',
     number: 1,
-    title: 'Die Macht des Zentrums (Zentrumskontrolle)',
-    tag: 'Eröffnung',
+    title_de: 'Die Macht des Zentrums (Zentrumskontrolle)',
+    title_fr: 'La puissance du centre (Contrôle central)',
+    tag_de: 'Eröffnung',
+    tag_fr: 'Ouverture',
     icon: '🎯',
-    summary: 'Spalte 4 (die mittlere Spalte) ist der Schlüssel zum Sieg!',
-    description: `
-      Ein Vier-Gewinnt-Spielfeld besitzt insgesamt 69 mögliche Gewinnlinien. 
-      Ganze <strong>16 dieser Linien</strong> verlaufen durch die mittlere Spalte (Spalte 4)!
-      Zum Vergleich: Durch die beiden Außenränder (Spalte 1 und 7) verlaufen jeweils nur magere 3 Gewinnlinien.
-      Wer das Zentrum beherrscht, hat fast unbegrenzte Kombinationsmöglichkeiten in alle Richtungen – 
-      horizontal, vertikal und über beide Diagonalen.
-    `,
-    proTip: 'Wenn du als Startspieler (Rot) beginnst, wirf deinen ersten Stein immer in die Mitte (Spalte 4)!',
+    summary_de: 'Spalte 4 (die mittlere Spalte) ist der Schlüssel zum Sieg!',
+    summary_fr: 'La Colonne 4 (la colonne centrale) est la clé de la victoire !',
+    proTip_de: 'Wenn du als Startspieler (Rot) beginnst, wirf deinen ersten Stein immer in die Mitte (Spalte 4)!',
+    proTip_fr: 'Si vous commencez (Rouge), jouez toujours votre premier jeton au centre (Colonne 4) !',
     diagram: 'center'
   },
   {
     id: 'dont-blunder',
     number: 2,
-    title: 'Die goldene Regel: Niemals Vorlagen liefern!',
-    tag: 'Verteidigung',
+    title_de: 'Die goldene Regel: Niemals Vorlagen liefern!',
+    title_fr: 'Règle d\'or : ne jamais offrir de tremplin !',
+    tag_de: 'Verteidigung',
+    tag_fr: 'Défense',
     icon: '⚠️',
-    summary: 'Prüfe vor JEDEM Zug das Feld direkt über deinem Stein!',
-    description: `
-      Der mit Abstand häufigste Grund für Niederlagen ist der sogenannte <em>Blunder</em> (die Vorlage):
-      Du wirfst einen Stein ein, und dieser Stein dient dem Gegner im nächsten Zug als perfekte Treppenstufe, 
-      um direkt auf das Feld darüber zu setzen und seine 4er-Kette zu vollenden!
-      Ein guter Spieler prüft immer: <em>"Was passiert, wenn der Gegner auf meinen Stein draufsetzt?"</em>
-    `,
-    proTip: 'Vermeide Spalten, bei denen das direkt darüberliegende Feld dem Gegner einen Sofort-Gewinn ermöglicht!',
+    summary_de: 'Prüfe vor JEDEM Zug das Feld direkt über deinem Stein!',
+    summary_fr: 'Vérifiez avant CHAQUE coup la case directement au-dessus de votre jeton !',
+    proTip_de: 'Vermeide Spalten, bei denen das direkt darüberliegende Feld dem Gegner einen Sofort-Gewinn ermöglicht!',
+    proTip_fr: 'Évitez les colonnes où la case supérieure offre une victoire immédiate à l\'adversaire !',
     diagram: 'blunder'
   },
   {
     id: 'preemptive-defense',
     number: 3,
-    title: 'Vorausschauende Verteidigung (Der Präventiv-Block)',
-    tag: 'Vorausblick',
+    title_de: 'Vorausschauende Verteidigung (Der Präventiv-Block)',
+    title_fr: 'Défense préventive (Le blocage anticipé)',
+    tag_de: 'Vorausblick',
+    tag_fr: 'Anticipation',
     icon: '🛡️⚡',
-    summary: 'Blockiere offene Dreierketten EINEN ZUG VORHER, bevor der 3. Stein liegt!',
-    description: `
-      Hat der Gegner zwei Steine in einer Reihe mit freiem Platz an beiden Enden (z. B. <code>_ O O _ _</code>), 
-      droht akute Gefahr: Setzt der Gegner den 3. Stein, entsteht eine <strong>offene Dreierkette mit zwei offenen Enden</strong>. 
-      Danach hast du ZWEI Totenköpfe auf dem Brett und die Niederlage ist unausweichlich!
-      Die Meistertaktik: <strong>Präventiv-Block!</strong> Setze sofort hinein, bevor der Gegner den 3. Stein legen kann.
-    `,
-    proTip: 'Warte niemals, bis eine Dreierkette an beiden Enden offen ist – blockiere sie bereits bei 2 Steinen!',
+    summary_de: 'Blockiere offene Dreierketten EINEN ZUG VORHER, bevor der 3. Stein liegt!',
+    summary_fr: 'Bloquez les alignements de 3 UN COUP AVANT que le 3e jeton ne soit posé !',
+    proTip_de: 'Warte niemals, bis eine Dreierkette an beiden Enden offen ist – blockiere sie bereits bei 2 Steinen!',
+    proTip_fr: 'N\'attendez jamais qu\'un alignement soit ouvert des deux côtés — bloquez dès 2 jetons !',
     diagram: 'preemptive'
   },
   {
     id: 'forks',
     number: 4,
-    title: 'Die Doppelbedrohung (Die "Gabel" / Fork)',
-    tag: 'Taktik',
+    title_de: 'Die Doppelbedrohung (Die "Gabel" / Fork)',
+    title_fr: 'La double menace (La fourchette)',
+    tag_de: 'Taktik',
+    tag_fr: 'Tactique',
     icon: '⚡',
-    summary: 'Erzwinge zwei Siegmöglichkeiten gleichzeitig!',
-    description: `
-      Eine Gabel entsteht, wenn du mit einem einzigen Zug ZWEI voneinander unabhängige Gewinnfelder eröffnest.
-      Da der Gegner in seinem Zug immer nur einen einzigen Stein setzen kann, 
-      kann er unmöglich beide Drohungen gleichzeitig abwehren.
-      Eine erfolgreich gelegte Gabel bedeutet den sicheren Sieg!
-    `,
-    proTip: 'Verbinde horizontale und diagonale Linien so, dass sie sich kreuzen.',
+    summary_de: 'Erzwinge zwei Siegmöglichkeiten gleichzeitig!',
+    summary_fr: 'Provoquez deux opportunités de victoire simultanées !',
+    proTip_de: 'Verbinde horizontale und diagonale Linien so, dass sie sich kreuzen.',
+    proTip_fr: 'Combinez des lignes horizontales et diagonales pour qu\'elles se croisent.',
     diagram: 'fork'
   },
   {
     id: 'open-threes',
     number: 5,
-    title: 'Offene Dreierketten (Two-Way Streaks)',
-    tag: 'Angriff',
+    title_de: 'Offene Dreierketten (Two-Way Streaks)',
+    title_fr: 'Alignements de 3 ouverts (Menaces bilatérales)',
+    tag_de: 'Angriff',
+    tag_fr: 'Attaque',
     icon: '🌟',
-    summary: 'Drei Steine mit zwei offenen Enden sind unaufhaltbar!',
-    description: `
-      Wenn du drei Steine in einer Reihe hast und BEIDE Enden frei sind (z. B. <code>_ O O O _</code>), 
-      hast du das Spiel praktisch gewonnen – es sei denn, der Gegner kann schneller gewinnen.
-      Blockiert der Gegner das linke Ende, gewinnst du am rechten Ende (und umgekehrt).
-    `,
-    proTip: 'Achte darauf, deine Steine frühzeitig so zu platzieren, dass zu beiden Seiten genügend freier Platz bleibt.',
+    summary_de: 'Drei Steine mit zwei offenen Enden sind unaufhaltbar!',
+    summary_fr: 'Trois jetons avec deux extrémités libres sont imparables !',
+    proTip_de: 'Achte darauf, deine Steine frühzeitig so zu platzieren, dass zu beiden Seiten genügend freier Platz bleibt.',
+    proTip_fr: 'Placez vos jetons tôt pour conserver assez d\'espace libre des deux côtés.',
     diagram: 'openthrees'
   },
   {
     id: 'parity',
     number: 6,
-    title: 'Die Paritäts-Regel (Gerade vs. Ungerade Zeilen)',
-    tag: 'Meisterklasse',
+    title_de: 'Die Paritäts-Regel (Gerade vs. Ungerade Zeilen)',
+    title_fr: 'La règle de parité (Lignes paires vs impaires)',
+    tag_de: 'Meisterklasse',
+    tag_fr: 'Niveau Expert',
     icon: '📏',
-    summary: 'Rot liebt ungerade Zeilen – Gelb liebt gerade Zeilen!',
-    description: `
-      Das Spielfeld hat 6 Zeilen (von unten: 1, 2, 3, 4, 5, 6).
-      Da Spieler 1 (Rot) immer anfängt, wird Rot bei voll werdenden Spalten immer die ungeraden Zeilen (1, 3, 5) besetzen!
-      Spieler 2 (Gelb) landet auf den geraden Zeilen (2, 4, 6).
-      Wenn Rot eine Siegdrohung auf einer ungeraden Zeile aufbaut, muss Gelb aufpassen: Gelb kann diese Zeile meist nicht kontrollieren.
-    `,
-    proTip: 'Als Rot solltest du gezielt Drohungen auf den Zeilen 1, 3 und 5 anpeilen; als Gelb auf Zeilen 2 und 4.',
+    summary_de: 'Rot liebt ungerade Zeilen – Gelb liebt gerade Zeilen!',
+    summary_fr: 'Les Rouges visent les lignes impaires — les Jaunes les lignes paires !',
+    proTip_de: 'Als Rot solltest du gezielt Drohungen auf den Zeilen 1, 3 und 5 anpeilen; als Gelb auf Zeilen 2 und 4.',
+    proTip_fr: 'En Rouge, visez les lignes 1, 3 et 5 ; en Jaune, ciblez les lignes 2 et 4.',
     diagram: 'parity'
   }
 ];
@@ -110,6 +98,31 @@ class ConnectFourTutor {
     this.COLS = 7;
     this.ROWS = 6;
     this.lessons = STRATEGY_LESSONS;
+    this.lang = 'de';
+  }
+
+  setLanguage(lang) {
+    this.lang = lang || 'de';
+  }
+
+  t(key, params = {}) {
+    if (typeof window !== 'undefined' && window.I18N && typeof window.I18N.t === 'function') {
+      return window.I18N.t(key, params);
+    }
+    return key;
+  }
+
+  getLesson(idx, lang) {
+    const l = this.lessons[idx] || this.lessons[0];
+    const isFr = (lang === 'fr' || this.lang === 'fr' || (typeof window !== 'undefined' && window.I18N && window.I18N.currentLang === 'fr'));
+    return {
+      title: isFr ? l.title_fr : l.title_de,
+      tag: isFr ? l.tag_fr : l.tag_de,
+      summary: isFr ? l.summary_fr : l.summary_de,
+      proTip: isFr ? l.proTip_fr : l.proTip_de,
+      icon: l.icon,
+      diagram: l.diagram
+    };
   }
 
   /**
@@ -229,7 +242,7 @@ class ConnectFourTutor {
    */
   evaluateDropMove(board, col, player, opponent, immediateOppThreats, potentialOppForks) {
     const targetRow = this.ai.getDropRow(board, col);
-    const colName = `Spalte ${col + 1}`;
+    const colName = this.t('bestColTarget', { col: col + 1 });
 
     if (targetRow === -1) {
       return {
@@ -239,14 +252,14 @@ class ConnectFourTutor {
         isFull: true,
         type: 'FULL',
         ratingPercent: 0,
-        ratingGrade: '0% — Nicht möglich',
-        qualityLabel: 'Spalte voll',
-        badge: 'Voll',
+        ratingGrade: this.t('ratingNotPossible'),
+        qualityLabel: this.t('colIsFullQuality'),
+        badge: this.t('badgeFull'),
         badgeClass: 'badge-full',
         score: -999999,
-        headline: `${colName} ist voll`,
-        explanation: 'In diese Spalte passt kein Stein mehr hinein.',
-        tacticalReason: 'Ungültiger Zug.',
+        headline: this.t('tacticalColFullHeadline', { col: colName }),
+        explanation: this.t('tacticalColFull'),
+        tacticalReason: this.t('tacticalInvalid'),
         highlights: { targetCell: null, winLine: null, dangerCell: null, oppWinLine: null, forkTarget: null }
       };
     }
@@ -266,14 +279,14 @@ class ConnectFourTutor {
         isFull: false,
         type: 'WIN',
         ratingPercent: 100,
-        ratingGrade: '100% — Siegzug',
-        qualityLabel: 'Siegzug (Perfekt)',
+        ratingGrade: this.t('tacticalWinGrade'),
+        qualityLabel: this.t('tacticalWinQuality'),
         badge: '👑 100%',
         badgeClass: 'badge-win',
         score: 1000000,
-        headline: `Siegzug in ${colName}!`,
-        explanation: `Mit diesem Einwurf vollendest du sofort deine 4er-Kette auf Zeile ${6 - targetRow} und gewinnst das Spiel!`,
-        tacticalReason: 'Sofortiger Spielgewinn (100% — Bester Zug).',
+        headline: this.t('tacticalWinHeadline', { col: colName }),
+        explanation: this.t('tacticalWinExplanation', { row: 6 - targetRow }),
+        tacticalReason: this.t('tacticalWin'),
         highlights: { targetCell, winLine, dangerCell: null, oppWinLine: null, forkTarget: null }
       };
     }
@@ -307,14 +320,14 @@ class ConnectFourTutor {
           isFull: false,
           type: 'BLUNDER',
           ratingPercent: 0,
-          ratingGrade: '0% — Niederlage',
-          qualityLabel: 'Tödliche Vorlage (0%)',
+          ratingGrade: this.t('tacticalBlunderGrade'),
+          qualityLabel: this.t('tacticalBlunderQuality'),
           badge: '❌ 0%',
           badgeClass: 'badge-blunder',
           score: -900000,
-          headline: `Tödliche Vorlage in ${colName}!`,
-          explanation: `Vorsicht Falle! Dein Stein dient dem Gegner als direkte Treppenstufe auf Zeile ${6 - (targetRow - 1)}. Der Gegner setzt sofort darauf und gewinnt das Spiel!`,
-          tacticalReason: 'Tödlicher Fehler (0%): Baut dem Gegner die Vorlage für den Sofort-Sieg.',
+          headline: this.t('tacticalBlunderHeadline', { col: colName }),
+          explanation: this.t('tacticalBlunderDesc'),
+          tacticalReason: this.t('tacticalFatalBlunder'),
           highlights: {
             targetCell,
             winLine: null,
@@ -327,7 +340,7 @@ class ConnectFourTutor {
 
       // Fall 2B: Ungeblockte gegnerische Drohung in einer anderen Spalte
       const unblocked = oppWinsAfter[0];
-      const threatColName = `Spalte ${unblocked.col + 1}`;
+      const threatColName = this.t('bestColTarget', { col: unblocked.col + 1 });
       return {
         action: 'drop',
         col,
@@ -335,14 +348,14 @@ class ConnectFourTutor {
         isFull: false,
         type: 'FATAL_IGNORE',
         ratingPercent: 0,
-        ratingGrade: '0% — Niederlage',
-        qualityLabel: 'Tödlicher Fehler (0%)',
+        ratingGrade: this.t('tacticalFatalLossGrade'),
+        qualityLabel: this.t('tacticalFatalLossQuality'),
         badge: '💀 0%',
         badgeClass: 'badge-blunder',
         score: -950000,
-        headline: `Tödlicher Fehler: Gegner gewinnt in ${threatColName}!`,
-        explanation: `Wenn du in ${colName} spielst, blockst du nicht die gegnerische 4er-Kette in ${threatColName}! Der Gegner setzt im nächsten Zug dort ein und gewinnt sofort das Spiel.`,
-        tacticalReason: `Führt zur sofortigen Niederlage (0%): Lässt den gegnerischen Siegzug in ${threatColName} ungehindert zu.`,
+        headline: this.t('tacticalFatalIgnoreHeadline', { threatCol: threatColName }),
+        explanation: this.t('tacticalFatalIgnoreDesc', { col: colName, threatCol: threatColName }),
+        tacticalReason: this.t('tacticalFatalLoss', { threatCol: threatColName }),
         highlights: {
           targetCell,
           winLine: null,
@@ -366,14 +379,14 @@ class ConnectFourTutor {
         isFull: false,
         type: 'MUST_BLOCK',
         ratingPercent: 95,
-        ratingGrade: '95% — Pflicht-Rettung',
-        qualityLabel: 'Pflicht-Rettung (Bester Zug)',
+        ratingGrade: this.t('tacticalMustBlockGrade'),
+        qualityLabel: this.t('tacticalMustBlockQuality'),
         badge: '🛡️ 95%',
         badgeClass: 'badge-block',
         score: 600000,
-        headline: `Lebenswichtige Rettung in ${colName}!`,
-        explanation: `Dieser Zug ist deine einzige Rettung! Der Gegner hatte hier bereits 3 Steine in einer Reihe. Durch deinen Block wendest du die unmittelbare Niederlage erfolgreich ab.`,
-        tacticalReason: 'Erfolgreiche Pflicht-Verteidigung (95%): Wehrt die drohende Niederlage ab.',
+        headline: this.t('tacticalMustBlockHeadline', { col: colName }),
+        explanation: this.t('tacticalMustBlockDesc'),
+        tacticalReason: this.t('tacticalForcedDefense'),
         highlights: {
           targetCell,
           winLine: null,
@@ -402,14 +415,14 @@ class ConnectFourTutor {
         isFull: false,
         type: 'PREEMPTIVE_BLOCK',
         ratingPercent: 88,
-        ratingGrade: '88% — Präventiv-Block',
-        qualityLabel: 'Präventiv-Block (Top)',
+        ratingGrade: this.t('tacticalPreemptiveGrade'),
+        qualityLabel: this.t('tacticalPreemptiveQuality'),
         badge: '🛡️⚡ 88%',
         badgeClass: 'badge-block',
         score: 450000,
-        headline: `Präventiv-Block in ${colName}!`,
-        explanation: `Vorausschauende Meister-Verteidigung! Wenn du hier nicht blockst, baut der Gegner im nächsten Zug eine offene Dreierkette mit zwei freien Enden. Dein Zug erstickt diese tödliche Doppelbedrohung rechtzeitig im Keim!`,
-        tacticalReason: 'Vorausschauende Rettung (88%): Verhindert eine unlösbare gegnerische Gabel im übernächsten Zug.',
+        headline: this.t('tacticalPreemptiveHeadline', { col: colName }),
+        explanation: this.t('tacticalPreemptiveDesc'),
+        tacticalReason: this.t('tacticalPreventFork'),
         highlights: {
           targetCell,
           winLine: null,
@@ -424,8 +437,8 @@ class ConnectFourTutor {
     // Wenn wir hierhin spielen, baut der Gegner im Gegenzug eine unaufhaltbare 2-Wege-Drohung
     if (oppForksAfterOurMove.length > 0) {
       const lethalFork = oppForksAfterOurMove[0];
-      const forkColName = `Spalte ${lethalFork.col + 1}`;
-      const winCols = lethalFork.winningSpots.map(s => `Spalte ${s + 1}`).join(' und ');
+      const forkColName = this.t('bestColTarget', { col: lethalFork.col + 1 });
+      const winCols = lethalFork.winningSpots.map(s => this.t('bestColTarget', { col: s + 1 })).join(' & ');
 
       return {
         action: 'drop',
@@ -434,14 +447,14 @@ class ConnectFourTutor {
         isFull: false,
         type: 'ALLOWS_FORK',
         ratingPercent: 15,
-        ratingGrade: '15% — Verliert in 2 Zügen',
-        qualityLabel: 'Gegner-Gabel droht (15%)',
+        ratingGrade: this.t('tacticalAllowForkGrade'),
+        qualityLabel: this.t('tacticalAllowForkQuality'),
         badge: '🛑 15%',
         badgeClass: 'badge-risky',
         score: -500000,
-        headline: `Gefahr im übernächsten Zug: Gegner-Gabel droht!`,
-        explanation: `Achtung Vorausblick: Wenn du in ${colName} spielst, kann der Gegner im Gegenzug in ${forkColName} eine offene Dreierkette / Gabel legen! Danach hat der Gegner ZWEI Gewinnfelder gleichzeitig (${winCols}), und du verlierst unweigerlich.`,
-        tacticalReason: `Führt zur Niederlage in 2 Zügen (15%): Erlaubt dem Gegner eine unaufhaltbare Doppelbedrohung in ${forkColName}.`,
+        headline: this.t('tacticalAllowForkHeadline'),
+        explanation: this.t('tacticalAllowForkDesc', { col: colName, forkCol: forkColName, winCols }),
+        tacticalReason: this.t('tacticalAllowFork', { forkCol: forkColName }),
         highlights: {
           targetCell,
           winLine: null,
@@ -459,7 +472,7 @@ class ConnectFourTutor {
     // A) Eigene Doppelbedrohung / Gabel (Fork — 90%)
     const forkSpots = this.findWinningSpots(simBoard, player);
     if (forkSpots.length >= 2) {
-      const forkColNames = forkSpots.map(c => `Spalte ${c + 1}`).join(' und ');
+      const forkColNames = forkSpots.map(c => this.t('bestColTarget', { col: c + 1 })).join(' & ');
       return {
         action: 'drop',
         col,
@@ -467,14 +480,14 @@ class ConnectFourTutor {
         isFull: false,
         type: 'FORK',
         ratingPercent: 90,
-        ratingGrade: '90% — Hervorragend',
-        qualityLabel: 'Hervorragend (Gabel)',
+        ratingGrade: this.t('tacticalForkGrade'),
+        qualityLabel: this.t('tacticalForkQuality'),
         badge: '⚡ 90%',
         badgeClass: 'badge-fork',
         score: 300000 + forkSpots.length * 10000,
-        headline: `Doppelbedrohung (Gabel) in ${colName}!`,
-        explanation: `Genialer Taktikzug! Dieser Stein eröffnet zwei getrennte Gewinnfelder gleichzeitig (${forkColNames}). Der Gegner kann nur eines blockieren – dein Sieg ist unausweichlich!`,
-        tacticalReason: 'Unlösbare Zwickmühle (90%): Erzeugt zwei gleichzeitige Siegchancen.',
+        headline: this.t('tacticalForkHeadline', { col: colName }),
+        explanation: this.t('tacticalForkDesc', { col: colName, forkCols: forkColNames }),
+        tacticalReason: this.t('tacticalCreateFork'),
         highlights: { targetCell, winLine: null, dangerCell: null, oppWinLine: null, forkTarget: null, forkCols: forkSpots }
       };
     }
@@ -486,7 +499,6 @@ class ConnectFourTutor {
 
     // C) Heuristische Stellungs- und Zentrumsbewertung
     let baseScore = this.ai.evaluateBoard(simBoard, player, opponent);
-    if (player === 2) baseScore = -baseScore;
 
     let centerBonus = 0;
     if (col === 3) centerBonus = 450;
@@ -505,14 +517,14 @@ class ConnectFourTutor {
         isFull: false,
         type: 'STRONG_ATTACK',
         ratingPercent: 82,
-        ratingGrade: '82% — Sehr stark',
-        qualityLabel: 'Sehr stark (Offene 3er)',
+        ratingGrade: this.t('tacticalAttackGrade'),
+        qualityLabel: this.t('tacticalAttackQuality'),
         badge: '🌟 82%',
         badgeClass: 'badge-strong',
         score: 100000 + finalScore,
-        headline: `Offene Dreierkette in ${colName}!`,
-        explanation: `Du baust eine Dreierkette mit freien Enden auf. Das setzt den Gegner massiv unter Druck und erzwingt Verteidigungszüge.`,
-        tacticalReason: 'Aggressiver Angriffsaufbau (82%): Hohe Durchschlagskraft.',
+        headline: this.t('tacticalAttackHeadline', { col: colName }),
+        explanation: this.t('tacticalAttackDesc'),
+        tacticalReason: this.t('tacticalAttackBuild'),
         highlights: { targetCell, winLine: null, dangerCell: null, oppWinLine: null, forkTarget: null }
       };
     }
@@ -525,14 +537,14 @@ class ConnectFourTutor {
         isFull: false,
         type: 'CENTER',
         ratingPercent: 75,
-        ratingGrade: '75% — Sehr gut',
-        qualityLabel: 'Sehr gut (Zentrum)',
+        ratingGrade: this.t('tacticalCenterGrade'),
+        qualityLabel: this.t('tacticalCenterQuality'),
         badge: '⭐ 75%',
         badgeClass: 'badge-best',
         score: 50000 + finalScore,
-        headline: `Zentrumskontrolle in ${colName}`,
-        explanation: `Die Mitte ist das Herzstück des Spiels. Von Spalte 4 kreuzen 16 mögliche 4er-Ketten in alle Richtungen – das ist das maximale Angriffspotenzial.`,
-        tacticalReason: 'Dominante Zentrumskontrolle (75%): Maximale Kombinationsvielfalt.',
+        headline: this.t('tacticalCenterHeadline', { col: colName }),
+        explanation: this.t('tacticalCenterDesc'),
+        tacticalReason: this.t('tacticalCenterControl'),
         highlights: { targetCell, winLine: null, dangerCell: null, oppWinLine: null, forkTarget: null }
       };
     }
@@ -545,14 +557,14 @@ class ConnectFourTutor {
         isFull: false,
         type: 'SOLID',
         ratingPercent: 65,
-        ratingGrade: '65% — Gut',
-        qualityLabel: 'Gut (Solide)',
+        ratingGrade: this.t('tacticalSolidGrade'),
+        qualityLabel: this.t('tacticalSolidQuality'),
         badge: '👍 65%',
         badgeClass: 'badge-good',
         score: 30000 + finalScore,
-        headline: `Solider Aufbau in ${colName}`,
-        explanation: `Gute Feldkontrolle im erweiterten Zentrum (13 potentielle Viererketten) ohne Risiko einer gegnerischen Vorlage.`,
-        tacticalReason: 'Solider Stellungsaufbau (65%): Sichere Positionsverbesserung.',
+        headline: this.t('tacticalSolidHeadline', { col: colName }),
+        explanation: this.t('tacticalSolidDesc'),
+        tacticalReason: this.t('tacticalSolidPosition'),
         highlights: { targetCell, winLine: null, dangerCell: null, oppWinLine: null, forkTarget: null }
       };
     }
@@ -566,16 +578,14 @@ class ConnectFourTutor {
         isFull: false,
         type: isPos ? 'NEUTRAL' : 'RISKY',
         ratingPercent: isPos ? 50 : 38,
-        ratingGrade: isPos ? '50% — Passabel' : '38% — Riskant',
-        qualityLabel: isPos ? 'Passabel (Mäßig)' : 'Riskant (Schwach)',
+        ratingGrade: isPos ? this.t('tacticalFlankPassableGrade') : this.t('tacticalFlankRiskyGrade'),
+        qualityLabel: isPos ? this.t('tacticalFlankPassableQuality') : this.t('tacticalFlankRiskyQuality'),
         badge: isPos ? '🟡 50%' : '⚠️ 38%',
         badgeClass: isPos ? 'badge-neutral' : 'badge-risky',
         score: 10000 + finalScore,
-        headline: isPos ? `Passabler Flankenzug in ${colName}` : `Riskante Position in ${colName}`,
-        explanation: isPos
-          ? `Flankenposition mit mäßigem Einfluss auf das Zentrum (7 mögliche Ketten).`
-          : `Dieser Zug bringt dir wenig Raumgewinn und könnte deine Stellung langfristig schwächen.`,
-        tacticalReason: isPos ? 'Passiver Flankenzug (50%).' : 'Taktisch ungünstige Feldwahl (38%).',
+        headline: isPos ? this.t('tacticalFlankPassableHeadline', { col: colName }) : this.t('tacticalFlankRiskyHeadline', { col: colName }),
+        explanation: isPos ? this.t('tacticalFlankPassableDesc') : this.t('tacticalFlankRiskyDesc'),
+        tacticalReason: isPos ? this.t('tacticalPassiveFlank') : this.t('tacticalUnfavorable'),
         highlights: { targetCell, winLine: null, dangerCell: null, oppWinLine: null, forkTarget: null }
       };
     }
@@ -588,14 +598,14 @@ class ConnectFourTutor {
       isFull: false,
       type: 'EDGE',
       ratingPercent: 28,
-      ratingGrade: '28% — Schwach',
-      qualityLabel: 'Schwach (Randzug)',
+      ratingGrade: this.t('tacticalEdgeGrade'),
+      qualityLabel: this.t('tacticalEdgeQuality'),
       badge: '⚠️ 28%',
       badgeClass: 'badge-risky',
       score: finalScore,
-      headline: `Schwacher Randzug in ${colName}`,
-      explanation: `Am Außenrand verlaufen nur magere 3 Viererketten. Randzüge haben im Eröffnungs- und Mittelspiel selten Durchschlagskraft.`,
-      tacticalReason: 'Wenig dynamischer Randzug (28%): Geringes strategisches Potenzial.',
+      headline: this.t('tacticalEdgeHeadline', { col: colName }),
+      explanation: this.t('tacticalEdgeDesc'),
+      tacticalReason: this.t('tacticalEdgeMove'),
       highlights: { targetCell, winLine: null, dangerCell: null, oppWinLine: null, forkTarget: null }
     };
   }
@@ -604,7 +614,7 @@ class ConnectFourTutor {
    * Analyse eines Pop-Out Zugs (Zusatzregel)
    */
   evaluatePopMove(board, col, player, opponent, immediateOppThreats) {
-    const colName = `Spalte ${col + 1}`;
+    const colName = this.t('bestColTarget', { col: col + 1 });
     const simBoard = this.ai.applyMove(board, { action: 'pop', col }, player);
 
     // Führt eigener Pop-Out zum eigenen Sieg?
@@ -614,14 +624,14 @@ class ConnectFourTutor {
         col,
         type: 'WIN',
         ratingPercent: 100,
-        ratingGrade: '100% — Siegzug',
-        qualityLabel: 'Pop-Siegzug',
-        badge: '👑 Pop-Sieg',
+        ratingGrade: this.t('tacticalWinGrade'),
+        qualityLabel: this.t('popWinQuality'),
+        badge: this.t('badgePopWin'),
         badgeClass: 'badge-win',
         score: 950000,
-        headline: `Gewinnbringender Pop-Out in ${colName}!`,
-        explanation: `Wenn du den untersten Stein herausziehst, fallen deine oberen Steine genau zu einer 4er-Reihe zusammen!`,
-        tacticalReason: 'Überraschender Kettenreaktions-Sieg durch Pop-Out (100%).'
+        headline: this.t('popWinHeadline', { col: colName }),
+        explanation: this.t('popWinDesc'),
+        tacticalReason: this.t('tacticalPopoutWin')
       };
     }
 
@@ -632,14 +642,14 @@ class ConnectFourTutor {
         col,
         type: 'BLUNDER',
         ratingPercent: 0,
-        ratingGrade: '0% — Niederlage',
-        qualityLabel: 'Fataler Pop-Out',
+        ratingGrade: this.t('ratingLoss'),
+        qualityLabel: this.t('popBlunderQuality'),
         badge: '❌ 0%',
         badgeClass: 'badge-blunder',
         score: -900000,
-        headline: `Gefährlicher Pop-Out in ${colName}!`,
-        explanation: `Achtung Katastrophe! Wenn du deinen Stein unten herausziehst, rutscht ein gegnerischer Stein genau in eine 4er-Gewinnreihe!`,
-        tacticalReason: 'Tödliche Kettenreaktion (0%): Schenkt dem Gegner sofort den Sieg.'
+        headline: this.t('popBlunderHeadline', { col: colName }),
+        explanation: this.t('popBlunderDesc'),
+        tacticalReason: this.t('tacticalPopoutBlunder')
       };
     }
 
@@ -648,14 +658,14 @@ class ConnectFourTutor {
       col,
       type: 'SOLID',
       ratingPercent: 50,
-      ratingGrade: '50% — Neutral',
-      qualityLabel: 'Pop-Out',
-      badge: '▲ Pop-Out',
+      ratingGrade: this.t('popNeutralGrade'),
+      qualityLabel: this.t('popNeutralQuality'),
+      badge: this.t('badgePopOut'),
       badgeClass: 'badge-neutral',
       score: 100,
-      headline: `Pop-Out in ${colName}`,
-      explanation: `Zieht deinen untersten Stein heraus und lässt die Steine darüber nach unten rutschen.`,
-      tacticalReason: 'Verändert die Spaltenhöhen und bricht eventuell Linien auf.'
+      headline: this.t('popNeutralHeadline', { col: colName }),
+      explanation: this.t('popWinDesc'),
+      tacticalReason: this.t('tacticalPopoutChange')
     };
   }
 
@@ -707,54 +717,57 @@ class ConnectFourTutor {
 
     // 1. ZWEI ODER MEHR AKUTE DROHUNGEN (Doppelbedrohung aktiv = zwei Totenköpfe)
     if (urgentThreats.length >= 2) {
-      const threatCols = urgentThreats.map(t => 'Spalte ' + (t.col + 1)).join(' und ');
+      const threatCols = urgentThreats.map(t => this.t('bestColTarget', { col: t.col + 1 })).join(' & ');
       return {
         mood: 'alarm',
         icon: '💀',
-        title: 'Doppelbedrohung aktiv!',
-        text: `Der Gegner besitzt eine offene Dreierkette mit ZWEI Gewinnfeldern (${threatCols}). Da du pro Runde nur ein Feld blockieren kannst, gewinnt der Gegner am anderen Ende. Lektion: Solche Ketten müssen immer EINEN ZUG VORHER (Präventiv-Block) gestoppt werden!`
+        title: this.t('coachDoubleThreatTitle'),
+        text: this.t('coachDoubleThreatText', { threatCols })
       };
     }
 
     // 2. Genau EINE akute Lebensgefahr: Gegner kann sofort gewinnen
     if (urgentThreats.length === 1) {
       const threat = urgentThreats[0];
+      const colName = this.t('bestColTarget', { col: threat.col + 1 });
       return {
         mood: 'alarm',
         icon: '🚨',
-        title: 'Alarmstufe Rot!',
-        text: `Der Gegner droht mit einem Sofort-Gewinn in Spalte ${threat.col + 1}! Du musst diese Spalte jetzt unbedingt mit der Pflicht-Rettung blockieren!`
+        title: this.t('coachRedAlertTitle'),
+        text: this.t('coachRedAlertText', { col: colName })
       };
     }
 
     // 3. VORAUSBLICK: Drohende Gegner-Gabel im übernächsten Zug
     if (potentialOppForks && potentialOppForks.length > 0) {
-      const forkCols = potentialOppForks.map(f => 'Spalte ' + (f.col + 1)).join(', ');
+      const forkCols = potentialOppForks.map(f => this.t('bestColTarget', { col: f.col + 1 })).join(', ');
       return {
         mood: 'warning',
         icon: '🛡️⚡',
-        title: 'Vorausblick: Gabel verhindern!',
-        text: `Achtung: Der Gegner bereitet eine offene Dreierkette / Gabel in ${forkCols} vor! Wenn du nicht jetzt präventiv blockst, droht im übernächsten Zug die unaufhaltbare Niederlage.`
+        title: this.t('coachPreventForkTitle'),
+        text: this.t('coachPreventForkText', { forkCols })
       };
     }
 
     // 4. Wir können sofort gewinnen!
     if (bestMove && bestMove.type === 'WIN') {
+      const colName = this.t('bestColTarget', { col: bestMove.col + 1 });
       return {
         mood: 'victory',
         icon: '🏆',
-        title: 'Siegzug bereit!',
-        text: `Du hast das Spiel in der Hand! Setze in Spalte ${bestMove.col + 1}, um deine Viererkette zu vollenden und zu gewinnen.`
+        title: this.t('coachWinReadyTitle'),
+        text: this.t('coachWinReadyText', { col: colName })
       };
     }
 
     // 5. Gabel entdeckt!
     if (bestMove && bestMove.type === 'FORK') {
+      const colName = this.t('bestColTarget', { col: bestMove.col + 1 });
       return {
         mood: 'excited',
         icon: '⚡',
-        title: 'Taktische Zwickmühle!',
-        text: `Nutze Spalte ${bestMove.col + 1}! Damit stellst du eine unlösbare Doppelbedrohung (Gabel) auf. Der Gegner kann nicht beide Wege verteidigen.`
+        title: this.t('coachForkTitle'),
+        text: this.t('coachForkText', { col: colName })
       };
     }
 
@@ -763,18 +776,19 @@ class ConnectFourTutor {
       return {
         mood: 'learning',
         icon: '🌟',
-        title: 'Eröffnungsphase: Die ersten Züge',
-        text: `In den ersten Zügen gilt: Spalte 4 (Zentrum) ist mathematisch die stärkste Eröffnung (16 Linien)! Klicke rechts auf "🌟 Eröffnungsvarianten", um die 4 Schlüssel-Muster in Grafiken zu studieren.`
+        title: this.t('coachOpeningTitle'),
+        text: this.t('coachOpeningText')
       };
     }
 
     // 7. Mittelspiel
     if (totalDiscs >= 4 && totalDiscs <= 16) {
+      const rec = bestMove ? this.t('bestColTarget', { col: bestMove.col + 1 }) : this.t('centerColName');
       return {
         mood: 'thinking',
         icon: '💡',
-        title: 'Mittelspiel: Vorlagen meiden',
-        text: `Baue eigene Reihen auf, aber prüfe immer: Kann der Gegner auf deinen Stein draufsetzen? Empfehlung: ${bestMove ? 'Spalte ' + (bestMove.col + 1) : 'Mitte'}.`
+        title: this.t('coachMidgameTitle'),
+        text: this.t('coachMidgameText', { rec })
       };
     }
 
@@ -782,8 +796,8 @@ class ConnectFourTutor {
     return {
       mood: 'tactical',
       icon: '♟️',
-      title: 'Endspiel: Präzision zählt!',
-      text: `Das Brett füllt sich. Berechne jeden Zug voraus: Wer kontrolliert die ungeraden Zeilen? Bleibe geduldig und vermeide Vorlagen.`
+      title: this.t('coachEndgameTitle'),
+      text: this.t('coachEndgameText')
     };
   }
 

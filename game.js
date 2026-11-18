@@ -139,6 +139,7 @@ class ConnectFourGame {
     this.history = [];      // Für Undo
     this.redoStack = [];    // Für Redo (Spielverlauf vorwärts anschauen)
     this.aiTimeoutId = null; // Timer-ID für anstehenden KI-Zug (abbrechbar bei Undo)
+    this.isShowingBestMove = false; // Steuert die visuelle Anzeige des besten Zugs (ohne ihn zu spielen)
 
     // Lernmodus & KI-Tutor
     this.learnMode = false;
@@ -159,11 +160,61 @@ class ConnectFourGame {
     };
 
     this.initDOMElements();
+    this.initLanguage();
     this.bindEvents();
     this.renderBoard();
     this.updateUI();
     this.clearMovePreview();
     this.updateTutorUI();
+  }
+
+  t(key, params) {
+    if (window.I18N) {
+      return window.I18N.t(key, params);
+    }
+    return key;
+  }
+
+  initLanguage() {
+    let saved = 'de';
+    try {
+      saved = localStorage.getItem('ag_4gewinnt_lang') || 'de';
+    } catch (e) {}
+    this.setLanguage(saved);
+  }
+
+  setLanguage(lang) {
+    if (window.I18N) {
+      window.I18N.setLanguage(lang);
+    }
+    if (this.tutor) {
+      this.tutor.setLanguage(lang);
+    }
+    if (this.btnLangDe) this.btnLangDe.classList.toggle('active', lang === 'de');
+    if (this.btnLangFr) this.btnLangFr.classList.toggle('active', lang === 'fr');
+
+    if (this.learnModeStatus) {
+      this.learnModeStatus.textContent = this.learnMode ? (lang === 'fr' ? 'OUI' : 'AN') : (lang === 'fr' ? 'NON' : 'AUS');
+    }
+
+    if (this.btnRibbonBestEl) {
+      this.btnRibbonBestEl.innerHTML = this.isShowingBestMove ? `<span>✕ ${this.t('hideBestBtn')}</span>` : `<span>${this.t('ribbonBestBtn')}</span>`;
+      this.btnRibbonBestEl.title = this.t('ribbonBestBtnTitle');
+    }
+
+    if (!this.isShowingBestMove && this.replayBestTargetEl) {
+      this.replayBestTargetEl.textContent = this.t('bestColTarget', { col: 4 });
+    }
+
+    this.updateUI();
+    this.updateTutorUI();
+    if (this.isShowingBestMove) {
+      this.displayBestMoveHint();
+    }
+  }
+
+  getLang() {
+    return (window.I18N && window.I18N.currentLang) || 'de';
   }
 
   createEmptyBoard() {
@@ -180,6 +231,13 @@ class ConnectFourGame {
     this.p1ScoreEl = document.getElementById('p1-score');
     this.p2ScoreEl = document.getElementById('p2-score');
     this.p2NameEl = document.getElementById('p2-name');
+
+    this.turnStoneRedTextEl = document.getElementById('turn-stone-red-text');
+    this.turnStoneYellowTextEl = document.getElementById('turn-stone-yellow-text');
+    this.btnManualAiEl = document.getElementById('btn-manual-ai');
+    this.statP1WinsEl = document.getElementById('stat-p1-wins');
+    this.statP2WinsEl = document.getElementById('stat-p2-wins');
+    this.statP2LabelEl = document.getElementById('stat-p2-label');
 
     this.aiThinkingEl = document.getElementById('ai-thinking');
     this.algoDepthEl = document.getElementById('algo-depth');
@@ -231,9 +289,54 @@ class ConnectFourGame {
     this.btnCloseStrategyModal = document.getElementById('btn-close-strategy-modal');
     this.btnCloseStrategyFooter = document.getElementById('btn-close-strategy-footer');
     this.btnActivateLearn = document.getElementById('btn-activate-learn');
+
+    // Zusatzregeln Ja/Nein Elemente
+    this.btnBonusNo = document.getElementById('btn-bonus-no');
+    this.btnBonusYes = document.getElementById('btn-bonus-yes');
+    this.bonusRulesDrawer = document.getElementById('bonus-rules-drawer');
+
+    // Farbanzeige unter dem Spielfeld (rotes und gelbes Steinchen)
+    this.boardTurnBarEl = document.getElementById('board-turn-bar');
+    this.turnBarCaptionEl = document.getElementById('turn-bar-caption');
+    this.turnStoneRedEl = document.getElementById('turn-stone-red');
+    this.turnStoneYellowEl = document.getElementById('turn-stone-yellow');
+
+    // Replay- & Best-Move-Elemente
+    this.replayPanelEl = document.getElementById('replay-panel');
+    this.replayModeTagEl = document.getElementById('replay-mode-tag');
+    this.replayStepCounterEl = document.getElementById('replay-step-counter');
+    this.btnShowBestMoveEl = document.getElementById('btn-show-best-move');
+    this.btnShowBestLabelEl = document.getElementById('btn-show-best-label');
+    this.bestBtnIconEl = document.getElementById('best-btn-icon');
+    this.replayBestCardEl = document.getElementById('replay-best-card');
+    this.replayBestBadgeEl = document.getElementById('replay-best-badge');
+    this.replayBestTargetEl = document.getElementById('replay-best-target');
+    this.replayBestDescEl = document.getElementById('replay-best-desc');
+    this.btnHideBestEl = document.getElementById('btn-hide-best');
+
+    this.boardReplayRibbonEl = document.getElementById('board-replay-ribbon');
+    this.ribbonStepCounterEl = document.getElementById('ribbon-step-counter');
+    this.ribbonTurnDiscEl = document.getElementById('ribbon-turn-disc');
+    this.ribbonTurnNameEl = document.getElementById('ribbon-turn-name');
+    this.btnRibbonBestEl = document.getElementById('btn-ribbon-best');
+
+    this.p1TurnPillEl = document.getElementById('p1-turn-pill');
+    this.p2TurnPillEl = document.getElementById('p2-turn-pill');
+
+    // Sprachumschaltung
+    this.btnLangDe = document.getElementById('btn-lang-de');
+    this.btnLangFr = document.getElementById('btn-lang-fr');
   }
 
   bindEvents() {
+    // Sprachauswahl Buttons
+    if (this.btnLangDe) {
+      this.btnLangDe.addEventListener('click', () => this.setLanguage('de'));
+    }
+    if (this.btnLangFr) {
+      this.btnLangFr.addEventListener('click', () => this.setLanguage('fr'));
+    }
+
     // Spalten-Drop Buttons
     this.colSelectorsEl.addEventListener('click', (e) => {
       const btn = e.target.closest('.col-btn');
@@ -261,6 +364,14 @@ class ConnectFourGame {
       }
     });
 
+    // Manuelle KI-Auslösung bei Wiederholungen
+    if (this.btnManualAiEl) {
+      this.btnManualAiEl.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.triggerAiMove();
+      });
+    }
+
     // Spielmodus Umschalter
     document.querySelectorAll('.mode-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -271,10 +382,16 @@ class ConnectFourGame {
         const aiCard = document.getElementById('ai-settings-card');
         if (this.gameMode === 'pvc') {
           aiCard.style.display = 'block';
-          this.p2NameEl.textContent = 'Computer (Gelb)';
+          if (this.p2NameEl) this.p2NameEl.textContent = this.t('colorYellowComputer');
+          if (this.turnStoneYellowTextEl) this.turnStoneYellowTextEl.textContent = this.t('colorYellowComputer');
+          if (this.turnStoneRedTextEl) this.turnStoneRedTextEl.textContent = this.t('colorRed');
+          if (this.statP2LabelEl) this.statP2LabelEl.textContent = this.t('statP2WinsComputer');
         } else {
           aiCard.style.display = 'none';
-          this.p2NameEl.textContent = 'Spieler 2 (Gelb)';
+          if (this.p2NameEl) this.p2NameEl.textContent = this.t('colorYellowP2');
+          if (this.turnStoneYellowTextEl) this.turnStoneYellowTextEl.textContent = this.t('colorYellowP2');
+          if (this.turnStoneRedTextEl) this.turnStoneRedTextEl.textContent = this.t('colorRedP1');
+          if (this.statP2LabelEl) this.statP2LabelEl.textContent = this.t('statP2WinsP2');
         }
         this.restartGame();
       });
@@ -289,6 +406,12 @@ class ConnectFourGame {
         this.updateAlgoDepthDisplay();
       });
     });
+
+    // Bonus Ja/Nein Umschalter
+    if (this.btnBonusNo && this.btnBonusYes) {
+      this.btnBonusNo.addEventListener('click', () => this.setBonusRulesActive(false));
+      this.btnBonusYes.addEventListener('click', () => this.setBonusRulesActive(true));
+    }
 
     // Bonus Toggles
     this.togglePopoutEl.addEventListener('change', (e) => {
@@ -379,7 +502,22 @@ class ConnectFourGame {
       if ((e.key === 'v' || e.key === 'V') && !e.target.matches('input, textarea') && !e.ctrlKey && !e.metaKey) {
         this.redoNextMove();
       }
+      // Bester Zug Toggle (Taste B oder H)
+      if ((e.key === 'b' || e.key === 'B' || e.key === 'h' || e.key === 'H') && !e.target.matches('input, textarea') && !e.ctrlKey && !e.metaKey) {
+        this.toggleBestMoveHint();
+      }
     });
+
+    // Bester Zug anzeigen Button (Links & im Ribbon)
+    if (this.btnShowBestMoveEl) {
+      this.btnShowBestMoveEl.addEventListener('click', () => this.toggleBestMoveHint());
+    }
+    if (this.btnRibbonBestEl) {
+      this.btnRibbonBestEl.addEventListener('click', () => this.toggleBestMoveHint());
+    }
+    if (this.btnHideBestEl) {
+      this.btnHideBestEl.addEventListener('click', () => this.clearBestMoveHint(true));
+    }
 
     // Strategie Akademie Modal & Tab Navigation
     if (this.btnOpenStrategies) {
@@ -460,6 +598,8 @@ class ConnectFourGame {
     this.history = [];
     this.redoStack = [];
     this.stats.currentMoves = 0;
+    this.isShowingBestMove = false;
+    this.clearBestMoveHint(true);
 
     // Game Over Banner ausblenden & Drop-Spalten wieder einblenden
     if (this.gameOverOverlayEl) {
@@ -527,6 +667,11 @@ class ConnectFourGame {
 
   handlePlayerAction(action, col) {
     if (this.gameOver || this.isAiTurn) return;
+
+    // Aktive Vorschau des besten Zugs vor dem eigenen Spielzug entfernen
+    if (this.isShowingBestMove) {
+      this.clearBestMoveHint(true);
+    }
 
     let moveSuccess = false;
 
@@ -619,7 +764,9 @@ class ConnectFourGame {
 
     this.isAiTurn = true;
     this.aiThinkingEl.style.display = 'flex';
-    this.turnTextEl.textContent = 'KI überlegt...';
+    if (this.turnTextEl) this.turnTextEl.textContent = this.t('aiThinking');
+    if (this.turnStoneYellowTextEl) this.turnStoneYellowTextEl.textContent = this.t('colorYellowThinking');
+    if (this.turnBarCaptionEl) this.turnBarCaptionEl.textContent = this.t('turnBarCaptionAi');
     this.clearMovePreview();
     this.updateTutorUI();
 
@@ -675,20 +822,18 @@ class ConnectFourGame {
       this.stats.p1Wins++;
       this.winningLine = this.ai.findWinningLine(this.board);
       this.sound.playWin();
-      this.showGameOverModal('🏆', 'Rot hat gewonnen!', 'Hervorragend gespielt! Analysiere das Spielfeld in Ruhe.', 'win-p1');
+      this.showGameOverModal('🏆', this.t('winnerRedTitle'), this.t('winnerSubRed'), 'win-p1');
     } else if (winner === 2) {
       this.stats.p2Wins++;
       this.winningLine = this.ai.findWinningLine(this.board);
       this.sound.playWin();
-      const p2Label = this.gameMode === 'pvc' ? 'Die KI (Gelb)' : 'Gelb';
-      const sub = this.gameMode === 'pvc' 
-        ? 'Ein genialer Schachzug der KI. Analysiere das Spielfeld in Ruhe.' 
-        : 'Gelb hat 4 Steine in einer Reihe! Analysiere das Spielfeld in Ruhe.';
-      this.showGameOverModal('🤖', `${p2Label} hat gewonnen!`, sub, 'win-p2');
+      const title = this.gameMode === 'pvc' ? this.t('winnerAiTitle') : this.t('winnerYellowTitle');
+      const sub = this.gameMode === 'pvc' ? this.t('winnerSubAi') : this.t('winnerSubYellow');
+      this.showGameOverModal('🤖', title, sub, 'win-p2');
     } else {
       this.stats.draws++;
       this.sound.playDraw();
-      this.showGameOverModal('🤝', 'Unentschieden!', 'Das gesamte Spielfeld ist voll besetzt.', 'win-draw');
+      this.showGameOverModal('🤝', this.t('winnerDrawTitle'), this.t('winnerSubDraw'), 'win-draw');
     }
 
     if (this.colSelectorsEl) {
@@ -805,12 +950,24 @@ class ConnectFourGame {
     this.clearMovePreview();
     this.updateTutorUI();
 
+    // Falls Bester Zug aktiv ist, sofort für die vorherige Stellung neu berechnen und anzeigen
+    if (this.isShowingBestMove) {
+      this.displayBestMoveHint();
+    }
+
     // Feedback im Tutor-Quickbar
     if (this.learnMode && this.tutorQuickMsg) {
-      const playerLabel = this.currentPlayer === 1 ? 'Rot' : (this.gameMode === 'pvc' ? 'Computer (Gelb)' : 'Gelb');
-      this.tutorQuickMsg.innerHTML = wasGameOver 
-        ? `<strong>Gewinnstellung aufgehoben!</strong> 1 Stein zurückgenommen. (Verlauf: ${this.history.length} zurück / ${this.redoStack.length} vor)` 
-        : `<strong>1 Stein zurückgenommen.</strong> ${playerLabel} ist jetzt am Zug. (Verlauf: ${this.history.length} zurück / ${this.redoStack.length} vor)`;
+      const isFr = this.getLang() === 'fr';
+      const playerLabel = this.currentPlayer === 1 ? this.t('colorRedP1') : (this.gameMode === 'pvc' ? this.t('colorYellowComputer') : this.t('colorYellowP2'));
+      if (isFr) {
+        this.tutorQuickMsg.innerHTML = wasGameOver 
+          ? `<strong>Position gagnante annulée !</strong> 1 coup en arrière. ${playerLabel} doit jouer. (Historique : ${this.history.length} arrière / ${this.redoStack.length} avant)` 
+          : `<strong>1 coup en arrière.</strong> ${playerLabel} doit jouer. (Historique : ${this.history.length} arrière / ${this.redoStack.length} avant)`;
+      } else {
+        this.tutorQuickMsg.innerHTML = wasGameOver 
+          ? `<strong>Gewinnstellung aufgehoben!</strong> 1 Stein zurückgenommen. ${playerLabel} ist als Nächstes am Zug. (Verlauf: ${this.history.length} zurück / ${this.redoStack.length} vor)` 
+          : `<strong>1 Stein zurückgenommen.</strong> ${playerLabel} ist als Nächstes am Zug. (Verlauf: ${this.history.length} zurück / ${this.redoStack.length} vor)`;
+      }
     }
   }
 
@@ -852,12 +1009,15 @@ class ConnectFourGame {
       if (this.colSelectorsEl) this.colSelectorsEl.style.display = 'none';
       if (this.boardFrameEl) this.boardFrameEl.classList.add('game-over-active');
 
-      const p2Label = this.gameMode === 'pvc' ? 'Die KI (Gelb)' : 'Gelb';
-      const title = this.winner === 1 ? 'Rot hat gewonnen!' : (this.winner === 2 ? `${p2Label} hat gewonnen!` : 'Unentschieden!');
-      const sub = this.winner === 1 ? 'Hervorragend gespielt! Analysiere das Spielfeld in Ruhe.' : 'Analysiere das Spielfeld in Ruhe.';
+      const title = this.winner === 1 ? this.t('winnerRedTitle') : (this.winner === 2 ? (this.gameMode === 'pvc' ? this.t('winnerAiTitle') : this.t('winnerYellowTitle')) : this.t('winnerDrawTitle'));
+      const sub = this.winner === 1 ? this.t('winnerSubRed') : (this.winner === 2 ? (this.gameMode === 'pvc' ? this.t('winnerSubAi') : this.t('winnerSubYellow')) : this.t('winnerSubDraw'));
       const winClass = this.winner === 1 ? 'win-p1' : (this.winner === 2 ? 'win-p2' : 'win-draw');
       const icon = this.winner === 1 ? '🏆' : (this.winner === 2 ? '🤖' : '🤝');
       this.showGameOverModal(icon, title, sub, winClass);
+
+      if (this.isShowingBestMove) {
+        this.clearBestMoveHint(true);
+      }
     } else {
       this.gameOver = false;
       this.winner = null;
@@ -873,59 +1033,87 @@ class ConnectFourGame {
     this.clearMovePreview();
     this.updateTutorUI();
 
+    // Falls Bester Zug aktiv ist, sofort für die Folgestellung neu berechnen und anzeigen
+    if (this.isShowingBestMove && !this.gameOver) {
+      this.displayBestMoveHint();
+    }
+
     // Feedback im Tutor-Quickbar
     if (this.learnMode && this.tutorQuickMsg) {
-      const playerLabel = this.currentPlayer === 1 ? 'Rot' : (this.gameMode === 'pvc' ? 'Computer (Gelb)' : 'Gelb');
-      this.tutorQuickMsg.innerHTML = nextState.gameOver
-        ? `<strong>Vorwärts zum Spielende!</strong> Siegesstellung wiederhergestellt. (Verlauf: ${this.history.length} zurück / ${this.redoStack.length} vor)`
-        : `<strong>1 Stein vorwärts.</strong> ${playerLabel} ist am Zug. (Verlauf: ${this.history.length} zurück / ${this.redoStack.length} vor)`;
+      const isFr = this.getLang() === 'fr';
+      const playerLabel = this.currentPlayer === 1 ? this.t('colorRedP1') : (this.gameMode === 'pvc' ? this.t('colorYellowComputer') : this.t('colorYellowP2'));
+      if (isFr) {
+        this.tutorQuickMsg.innerHTML = nextState.gameOver
+          ? `<strong>Avance jusqu'à la fin de la partie !</strong> Position gagnante rétablie. (Historique : ${this.history.length} arrière / ${this.redoStack.length} avant)`
+          : `<strong>1 coup en avant.</strong> ${playerLabel} doit jouer. (Historique : ${this.history.length} arrière / ${this.redoStack.length} avant)`;
+      } else {
+        this.tutorQuickMsg.innerHTML = nextState.gameOver
+          ? `<strong>Vorwärts zum Spielende!</strong> Siegesstellung wiederhergestellt. (Verlauf: ${this.history.length} zurück / ${this.redoStack.length} vor)`
+          : `<strong>1 Stein vorwärts.</strong> ${playerLabel} ist als Nächstes am Zug. (Verlauf: ${this.history.length} zurück / ${this.redoStack.length} vor)`;
+      }
     }
   }
 
   updateUI() {
-    // HUD
+    // Falls das obere HUD vorhanden ist (optional)
     if (this.gameOver) {
       if (this.winner === 1) {
-        this.p1HudEl.classList.add('active', 'winner-glow');
-        this.p2HudEl.classList.remove('active', 'winner-glow');
-        this.turnTextEl.textContent = '🏆 Rot hat gewonnen!';
+        if (this.p1HudEl) this.p1HudEl.classList.add('active', 'winner-glow');
+        if (this.p2HudEl) this.p2HudEl.classList.remove('active', 'winner-glow');
+        if (this.turnTextEl) this.turnTextEl.textContent = `🏆 ${this.t('winnerRedTitle')}`;
       } else if (this.winner === 2) {
-        this.p2HudEl.classList.add('active', 'winner-glow');
-        this.p1HudEl.classList.remove('active', 'winner-glow');
-        const p2Label = this.gameMode === 'pvc' ? 'Computer' : 'Gelb';
-        this.turnTextEl.textContent = `🤖 ${p2Label} hat gewonnen!`;
+        if (this.p2HudEl) this.p2HudEl.classList.add('active', 'winner-glow');
+        if (this.p1HudEl) this.p1HudEl.classList.remove('active', 'winner-glow');
+        const p2WinTitle = this.gameMode === 'pvc' ? this.t('winnerAiTitle') : this.t('winnerYellowTitle');
+        if (this.turnTextEl) this.turnTextEl.textContent = `🤖 ${p2WinTitle}`;
       } else {
-        this.p1HudEl.classList.remove('active', 'winner-glow');
-        this.p2HudEl.classList.remove('active', 'winner-glow');
-        this.turnTextEl.textContent = '🤝 Unentschieden!';
+        if (this.p1HudEl) this.p1HudEl.classList.remove('active', 'winner-glow');
+        if (this.p2HudEl) this.p2HudEl.classList.remove('active', 'winner-glow');
+        if (this.turnTextEl) this.turnTextEl.textContent = `🤝 ${this.t('winnerDrawTitle')}`;
       }
     } else {
-      this.p1HudEl.classList.remove('winner-glow');
-      this.p2HudEl.classList.remove('winner-glow');
+      if (this.p1HudEl) this.p1HudEl.classList.remove('winner-glow');
+      if (this.p2HudEl) this.p2HudEl.classList.remove('winner-glow');
+      const isReplaying = this.redoStack.length > 0;
+      const isFr = this.getLang() === 'fr';
+      const replayTag = isFr ? 'Relecture' : 'Wiederholung';
       if (this.currentPlayer === 1) {
-        this.p1HudEl.classList.add('active');
-        this.p2HudEl.classList.remove('active');
-        this.turnTextEl.textContent = 'Rot ist am Zug';
+        if (this.p1HudEl) {
+          this.p1HudEl.classList.add('active');
+          this.p2HudEl.classList.remove('active');
+        }
+        if (this.turnTextEl) {
+          const redTurnText = isFr ? 'Au tour des Rouges' : 'Rot ist am Zug';
+          this.turnTextEl.innerHTML = isReplaying 
+            ? `<span class="turn-replay-chip">${replayTag}</span> <span>🔴 ${redTurnText}</span>` 
+            : redTurnText;
+        }
       } else {
-        this.p1HudEl.classList.remove('active');
-        this.p2HudEl.classList.add('active');
-        if (this.gameMode === 'pvc') {
-          this.turnTextEl.innerHTML = `<span>Gelb (KI) ist am Zug</span> <button id="btn-manual-ai" class="btn-mini-ai" title="KI den Zug ausführen lassen">🤖 KI ziehen lassen</button>`;
-          const btnManualAi = document.getElementById('btn-manual-ai');
-          if (btnManualAi) {
-            btnManualAi.onclick = (e) => {
-              e.stopPropagation();
-              this.triggerAiMove();
-            };
+        if (this.p1HudEl) this.p1HudEl.classList.remove('active');
+        if (this.p2HudEl) this.p2HudEl.classList.add('active');
+        if (this.turnTextEl) {
+          if (this.gameMode === 'pvc') {
+            const replayPrefix = isReplaying ? `<span class="turn-replay-chip">${replayTag}</span> ` : '';
+            const yellowTurnText = isFr ? "L'IA réfléchit..." : 'Gelb (KI) ist am Zug';
+            this.turnTextEl.innerHTML = `${replayPrefix}<span>🟡 ${yellowTurnText}</span>`;
+          } else {
+            const yellowTurnText = isFr ? 'Au tour des Jaunes' : 'Gelb ist am Zug';
+            this.turnTextEl.innerHTML = isReplaying 
+              ? `<span class="turn-replay-chip">${replayTag}</span> <span>🟡 ${yellowTurnText}</span>` 
+              : yellowTurnText;
           }
-        } else {
-          this.turnTextEl.textContent = 'Gelb ist am Zug';
         }
       }
     }
 
-    this.p1ScoreEl.textContent = `${this.stats.p1Wins} Siege`;
-    this.p2ScoreEl.textContent = `${this.stats.p2Wins} Siege`;
+    const winSuffix = this.getLang() === 'fr' ? 'victoires' : 'Siege';
+    if (this.p1ScoreEl) this.p1ScoreEl.textContent = `${this.stats.p1Wins} ${winSuffix}`;
+    if (this.p2ScoreEl) this.p2ScoreEl.textContent = `${this.stats.p2Wins} ${winSuffix}`;
+    if (this.statP1WinsEl) this.statP1WinsEl.textContent = this.stats.p1Wins;
+    if (this.statP2WinsEl) this.statP2WinsEl.textContent = this.stats.p2Wins;
+    if (this.statP2LabelEl) {
+      this.statP2LabelEl.textContent = this.gameMode === 'pvc' ? this.t('statP2WinsComputer') : this.t('statP2WinsP2');
+    }
 
     // Statistiken
     this.statRoundsEl.textContent = this.stats.rounds;
@@ -941,22 +1129,31 @@ class ConnectFourGame {
     if (this.btnUndoEl) {
       this.btnUndoEl.disabled = !canUndo;
       this.btnUndoEl.title = canUndo 
-        ? `Einen Stein zurücknehmen (${this.history.length} im Verlauf) — Taste U oder Strg+Z` 
-        : 'Keine Spielzüge zum Zurücknehmen vorhanden';
+        ? `${this.t('undoTooltip')} (${this.history.length})` 
+        : '';
     }
 
     const canRedo = this.redoStack.length > 0;
     if (this.btnRedoEl) {
       this.btnRedoEl.disabled = !canRedo;
       this.btnRedoEl.title = canRedo 
-        ? `Einen Stein vorwärtsgehen (${this.redoStack.length} im Vorwärts-Speicher) — Taste V oder Strg+Y` 
-        : 'Keine Spielzüge im Vorwärts-Speicher vorhanden';
+        ? `${this.t('redoTooltip')} (${this.redoStack.length})` 
+        : '';
     }
+
+    // Kenntliche Farbanzeige & Wiederholungs-Status aktualisieren
+    this.updateReplayAndTurnDisplay();
   }
 
   updateAlgoDepthDisplay() {
-    const depths = { 1: '1 Zug (Anfänger)', 2: '3 Züge (Fortgeschritten)', 3: '5 Züge (Taktiker)', 4: '7+ Züge (Meister)' };
-    this.algoDepthEl.textContent = depths[this.difficulty] || '3 Züge';
+    const suffix = this.t('algoMovesSuffix');
+    const depths = {
+      1: `1 ${suffix} (${this.t('diff1Name')})`,
+      2: `3 ${suffix} (${this.t('diff2Name')})`,
+      3: `5 ${suffix} (${this.t('diff3Name')})`,
+      4: `7+ ${suffix} (${this.t('diff4Name')})`
+    };
+    this.algoDepthEl.textContent = depths[this.difficulty] || `3 ${suffix}`;
   }
 
   updateColButtons() {
@@ -999,9 +1196,10 @@ class ConnectFourGame {
       this.learnMode = !this.learnMode;
     }
 
+    const isFr = window.I18N && window.I18N.currentLang === 'fr';
     if (this.learnMode) {
       if (this.btnLearnMode) this.btnLearnMode.classList.add('active');
-      if (this.learnModeStatus) this.learnModeStatus.textContent = 'AN';
+      if (this.learnModeStatus) this.learnModeStatus.textContent = isFr ? 'OUI' : 'AN';
       document.body.classList.add('learn-mode-on');
       if (this.tutorQuickbar) this.tutorQuickbar.style.display = 'flex';
       if (this.tutorCard) this.tutorCard.style.display = 'block';
@@ -1009,7 +1207,7 @@ class ConnectFourGame {
       this.updateTutorUI();
     } else {
       if (this.btnLearnMode) this.btnLearnMode.classList.remove('active');
-      if (this.learnModeStatus) this.learnModeStatus.textContent = 'AUS';
+      if (this.learnModeStatus) this.learnModeStatus.textContent = isFr ? 'NON' : 'AUS';
       document.body.classList.remove('learn-mode-on');
       if (this.tutorQuickbar) this.tutorQuickbar.style.display = 'none';
       if (this.tutorCard) this.tutorCard.style.display = 'none';
@@ -1027,27 +1225,30 @@ class ConnectFourGame {
 
     if (this.gameOver) {
       if (this.coachMoodIcon) this.coachMoodIcon.textContent = '🏁';
-      if (this.coachMoodTitle) this.coachMoodTitle.textContent = 'Partie beendet';
+      if (this.coachMoodTitle) this.coachMoodTitle.textContent = this.t('winnerTag');
       if (this.winner === 1) {
-        if (this.coachText) this.coachText.textContent = 'Glückwunsch! Deine 4er-Reihe leuchtet auf dem Spielfeld. Schau dir die Stellung in Ruhe an und klicke auf "Neues Spiel", sobald du bereit bist.';
-        if (this.tutorQuickMsg) this.tutorQuickMsg.innerHTML = '<strong>Sieg für Rot!</strong> Die 4er-Reihe leuchtet auf dem Brett. Schau dir das Spielfeld in Ruhe an.';
+        if (this.coachText) this.coachText.textContent = this.t('coachGameOverRed');
+        if (this.tutorQuickMsg) this.tutorQuickMsg.innerHTML = `<strong>${this.t('tutorQuickWinRedTitle')}</strong> ${this.t('tutorQuickWinRedDesc')}`;
       } else if (this.winner === 2) {
-        const kiName = this.gameMode === 'pvc' ? 'Die KI' : 'Gelb';
-        if (this.coachText) this.coachText.textContent = `${kiName} hat 4 Steine in eine Reihe gebracht (siehe leuchtende Steine). Untersuche in Ruhe auf dem Brett, wo der entscheidende Zug lag!`;
-        if (this.tutorQuickMsg) this.tutorQuickMsg.innerHTML = `<strong>${kiName} hat gewonnen!</strong> Die 4er-Reihe leuchtet auf dem Spielfeld — analysiere die Stellung in Ruhe.`;
+        const isFr = this.getLang() === 'fr';
+        const kiName = this.gameMode === 'pvc' ? (isFr ? "L'IA" : 'Die KI') : this.t('colorYellow');
+        if (this.coachText) this.coachText.textContent = this.t('coachGameOverYellow', { name: kiName });
+        if (this.tutorQuickMsg) this.tutorQuickMsg.innerHTML = `<strong>${this.t('tutorQuickWinYellowTitle', { name: kiName })}</strong> ${this.t('tutorQuickWinYellowDesc')}`;
       } else {
-        if (this.coachText) this.coachText.textContent = 'Unentschieden! Das Spielfeld ist komplett besetzt. Klicke auf "Neues Spiel" für die nächste Runde.';
-        if (this.tutorQuickMsg) this.tutorQuickMsg.innerHTML = '<strong>Unentschieden!</strong> Volles Spielfeld. Klicke auf "Neues Spiel" für die nächste Runde.';
+        if (this.coachText) this.coachText.textContent = this.t('coachGameOverDraw');
+        if (this.tutorQuickMsg) this.tutorQuickMsg.innerHTML = `<strong>${this.t('winnerDrawTitle')}</strong> ${this.t('coachGameOverDraw')}`;
       }
       this.clearColBadges();
       return;
     }
 
     if (this.isAiTurn) {
+      const isFr = this.getLang() === 'fr';
+      const kiTitle = isFr ? "L'IA est en train de jouer..." : 'Die KI ist am Zug...';
       if (this.coachMoodIcon) this.coachMoodIcon.textContent = '⏳';
-      if (this.coachMoodTitle) this.coachMoodTitle.textContent = 'KI rechnet...';
-      if (this.coachText) this.coachText.textContent = 'Die KI überlegt ihren Zug. Beobachte aufmerksam, wie sie auf Bedrohungen reagiert und das Zentrum nutzt!';
-      if (this.tutorQuickMsg) this.tutorQuickMsg.innerHTML = '<strong>Die KI ist am Zug...</strong> Gleich bist du wieder dran!';
+      if (this.coachMoodTitle) this.coachMoodTitle.textContent = this.t('coachThinkingTitle');
+      if (this.coachText) this.coachText.textContent = this.t('coachThinkingText');
+      if (this.tutorQuickMsg) this.tutorQuickMsg.innerHTML = `<strong>${kiTitle}</strong> ${this.t('tutorQuickAiThinking')}`;
       return;
     }
 
@@ -1078,7 +1279,7 @@ class ConnectFourGame {
     // 3. Best-Move Box
     const best = analysis.bestMove;
     if (best && !best.isFull) {
-      if (this.bestMoveCol) this.bestMoveCol.textContent = `Spalte ${best.col + 1}`;
+      if (this.bestMoveCol) this.bestMoveCol.textContent = this.t('bestColTarget', { col: best.col + 1 });
       if (this.bestMoveTag) {
         this.bestMoveTag.textContent = best.badge;
         this.bestMoveTag.className = `best-move-tag ${best.badgeClass}`;
@@ -1087,9 +1288,9 @@ class ConnectFourGame {
         this.bestMoveReason.textContent = best.tacticalReason;
       }
     } else {
-      if (this.bestMoveCol) this.bestMoveCol.textContent = 'Kein Zug';
+      if (this.bestMoveCol) this.bestMoveCol.textContent = this.t('noMovePossible');
       if (this.bestMoveTag) this.bestMoveTag.textContent = '—';
-      if (this.bestMoveReason) this.bestMoveReason.textContent = 'Keine freien legalen Züge mehr verfügbar.';
+      if (this.bestMoveReason) this.bestMoveReason.textContent = this.t('noMoveDesc');
     }
 
     // 4. Spalten-Liste im Tutor-Panel
@@ -1116,7 +1317,7 @@ class ConnectFourGame {
         item.innerHTML = `
           <div class="col-item-left">
             <span class="col-dot" style="background: ${dotColor};"></span>
-            <span class="col-item-name">Spalte ${idx + 1}</span>
+            <span class="col-item-name">${this.t('bestColTarget', { col: idx + 1 })}</span>
             <span class="col-rating-meter"><span class="col-rating-fill" style="width: ${m.ratingPercent}%; background: ${dotColor};"></span></span>
           </div>
           <div class="col-item-right">
@@ -1140,16 +1341,18 @@ class ConnectFourGame {
     if (this.tutorStrategyTip) {
       const lessons = this.tutor.lessons;
       const lessonIdx = (this.stats.currentMoves + this.stats.rounds) % lessons.length;
-      const currentLesson = lessons[lessonIdx];
+      const currentLesson = this.tutor.getLesson(lessonIdx, this.getLang());
       this.tutorStrategyTip.innerHTML = `<strong>${currentLesson.title}:</strong> ${currentLesson.proTip}`;
     }
 
     // 6. Quickbar Standardtext
     if (this.tutorQuickMsg) {
       if (best && !best.isFull) {
-        this.tutorQuickMsg.innerHTML = `<strong>Tutor-Empfehlung:</strong> Spiele <strong>Spalte ${best.col + 1}</strong> [${best.ratingGrade}] — ${best.tacticalReason}`;
+        const colLabel = this.t('bestColTarget', { col: best.col + 1 });
+        const playColStr = this.t('tutorPlayCol', { col: colLabel });
+        this.tutorQuickMsg.innerHTML = `<strong>${this.t('tutorRecommendation')}:</strong> ${playColStr} [${best.ratingGrade || best.badge}] — ${best.tacticalReason}`;
       } else {
-        this.tutorQuickMsg.innerHTML = 'Wähle deinen nächsten Zug.';
+        this.tutorQuickMsg.innerHTML = this.t('tutorQuickWelcome');
       }
     }
   }
@@ -1168,7 +1371,8 @@ class ConnectFourGame {
 
     if (move.isFull) {
       if (this.tutorQuickMsg) {
-        this.tutorQuickMsg.innerHTML = `<strong>Spalte ${col + 1} ist voll!</strong> Wähle bitte eine freie Spalte.`;
+        const colLabel = this.t('bestColTarget', { col: col + 1 });
+        this.tutorQuickMsg.innerHTML = `<strong>${this.t('colFullMsg', { col: colLabel })}</strong> ${this.t('chooseFreeCol')}`;
       }
       return;
     }
@@ -1192,12 +1396,13 @@ class ConnectFourGame {
       const dangerSlot = this.getSlotElement(dr, dc);
       if (dangerSlot) {
         dangerSlot.classList.add('danger-field');
+        const dangerColName = this.t('bestColTarget', { col: dc + 1 }).toUpperCase();
         if (move.type === 'FATAL_IGNORE') {
-          dangerSlot.setAttribute('data-danger-label', `⚠️ GEGNER-SIEG IN SPALTE ${dc + 1}!`);
+          dangerSlot.setAttribute('data-danger-label', `⚠️ ${this.t('dangerOppWinIn', { col: dangerColName })}!`);
         } else if (move.type === 'ALLOWS_FORK') {
-          dangerSlot.setAttribute('data-danger-label', `⚠️ DROHENDE GEGNER-GABEL IN SPALTE ${dc + 1}!`);
+          dangerSlot.setAttribute('data-danger-label', `⚠️ ${this.t('dangerOppForkIn', { col: dangerColName })}!`);
         } else {
-          dangerSlot.setAttribute('data-danger-label', '⚠️ GEGNER-SIEG!');
+          dangerSlot.setAttribute('data-danger-label', `⚠️ ${this.t('dangerOppWin')}!`);
         }
       }
     }
@@ -1222,7 +1427,8 @@ class ConnectFourGame {
 
     // Quickbar anpassen mit Bewertung und detaillierter Erklärung
     if (this.tutorQuickMsg) {
-      this.tutorQuickMsg.innerHTML = `<strong>Spalte ${col + 1} [${move.ratingGrade}]:</strong> ${move.headline} — ${move.explanation}`;
+      const colLabel = this.t('bestColTarget', { col: col + 1 });
+      this.tutorQuickMsg.innerHTML = `<strong>${colLabel} [${move.ratingGrade}]:</strong> ${move.headline} — ${move.explanation}`;
     }
   }
 
@@ -1230,8 +1436,8 @@ class ConnectFourGame {
    * Entfernt alle visuellen Vorschau-Elemente vom Spielfeld
    */
   clearMovePreview() {
-    // Alle Ghost-Discs entfernen
-    const ghosts = this.boardGridEl.querySelectorAll('.ghost-disc');
+    // Alle normalen Ghost-Discs entfernen (außer Best-Move Hint, falls gerade aktiv)
+    const ghosts = this.boardGridEl.querySelectorAll('.ghost-disc:not(.ghost-best-hint)');
     ghosts.forEach(g => g.remove());
 
     // Alle Danger-Fields entfernen
@@ -1241,15 +1447,19 @@ class ConnectFourGame {
       s.removeAttribute('data-danger-label');
     });
 
-    // Alle Threat/Win Highlights entfernen
-    const highlightedDiscs = this.boardGridEl.querySelectorAll('.threat-highlight, .win-highlight');
-    highlightedDiscs.forEach(d => d.classList.remove('threat-highlight', 'win-highlight'));
+    // Alle Threat/Win Highlights entfernen (außer bei aktivem Best-Move Hint)
+    if (!this.isShowingBestMove) {
+      const highlightedDiscs = this.boardGridEl.querySelectorAll('.threat-highlight, .win-highlight');
+      highlightedDiscs.forEach(d => d.classList.remove('threat-highlight', 'win-highlight'));
+    }
 
     // Quickbar auf Best-Move zurücksetzen
     if (this.learnMode && this.currentAnalysis && this.currentAnalysis.bestMove && this.tutorQuickMsg) {
       const best = this.currentAnalysis.bestMove;
       if (!best.isFull) {
-        this.tutorQuickMsg.innerHTML = `<strong>Tutor-Empfehlung:</strong> Spiele <strong>Spalte ${best.col + 1}</strong> [${best.ratingGrade}] — ${best.tacticalReason}`;
+        const colLabel = this.t('bestColTarget', { col: best.col + 1 });
+        const playColStr = this.t('tutorPlayCol', { col: colLabel });
+        this.tutorQuickMsg.innerHTML = `<strong>${this.t('tutorRecommendation')}:</strong> ${playColStr} [${best.ratingGrade || best.badge}] — ${best.tacticalReason}`;
       }
     }
   }
@@ -1263,6 +1473,376 @@ class ConnectFourGame {
       if (badge) {
         badge.className = 'col-badge';
         badge.textContent = '';
+      }
+    }
+  }
+
+  /**
+   * Steuert die Anzeige des Zusatzregeln-Blocks (Ja / Nein)
+   * @param {boolean} active
+   */
+  setBonusRulesActive(active) {
+    if (active) {
+      if (this.btnBonusYes) this.btnBonusYes.classList.add('active');
+      if (this.btnBonusNo) this.btnBonusNo.classList.remove('active');
+      if (this.bonusRulesDrawer) this.bonusRulesDrawer.style.display = 'block';
+    } else {
+      if (this.btnBonusNo) this.btnBonusNo.classList.add('active');
+      if (this.btnBonusYes) this.btnBonusYes.classList.remove('active');
+      if (this.bonusRulesDrawer) this.bonusRulesDrawer.style.display = 'none';
+
+      let needRestart = false;
+      if (this.togglePopoutEl && this.togglePopoutEl.checked) {
+        this.togglePopoutEl.checked = false;
+        this.popOutEnabled = false;
+        if (this.popoutBarEl) this.popoutBarEl.style.display = 'none';
+      }
+      if (this.toggleObstaclesEl && this.toggleObstaclesEl.checked) {
+        this.toggleObstaclesEl.checked = false;
+        this.obstaclesEnabled = false;
+        needRestart = true;
+      }
+      if (needRestart) {
+        this.restartGame();
+      } else {
+        this.updatePopOutButtons();
+        this.updateTutorUI();
+      }
+    }
+  }
+
+  /**
+   * Aktualisiert die visuelle Kenntlichmachung, welche Farbe als Nächstes am Zug ist:
+   * platzsparend direkt unter dem Spielfeld (rotes und gelbes Steinchen),
+   * im Ribbon über dem Spielfeld und im HUD.
+   */
+  updateReplayAndTurnDisplay() {
+    const isReplaying = this.redoStack.length > 0;
+    const totalMoves = this.history.length + this.redoStack.length;
+    const currentStep = this.history.length;
+
+    const isP1 = this.currentPlayer === 1;
+    const isComputer = this.gameMode === 'pvc';
+    const pColorName = isP1 ? this.t('colorRed') : (isComputer ? this.t('colorYellowComputer') : this.t('colorYellowP2'));
+    const pColorClass = isP1 ? 'turn-red' : 'turn-yellow';
+    const pDiscClass = isP1 ? 'disc-red' : 'disc-yellow';
+
+    // 1. Platzsparende Farbanzeige direkt unter dem Spielfeld mit rotem & gelbem Steinchen
+    const yellowLabel = isComputer 
+      ? (this.isAiTurn ? this.t('colorYellowThinking') : this.t('colorYellowComputer')) 
+      : this.t('colorYellowP2');
+    const redLabel = isComputer ? this.t('colorRed') : this.t('colorRedP1');
+
+    if (this.turnStoneRedTextEl) this.turnStoneRedTextEl.textContent = redLabel;
+    if (this.turnStoneYellowTextEl) this.turnStoneYellowTextEl.textContent = yellowLabel;
+
+    if (this.turnStoneRedEl && this.turnStoneYellowEl) {
+      if (this.gameOver) {
+        if (this.winner === 1) {
+          this.turnStoneRedEl.classList.add('active', 'is-winner');
+          this.turnStoneYellowEl.classList.remove('active', 'is-winner');
+          if (this.turnBarCaptionEl) this.turnBarCaptionEl.textContent = this.t('turnBarCaptionWinner');
+        } else if (this.winner === 2) {
+          this.turnStoneYellowEl.classList.add('active', 'is-winner');
+          this.turnStoneRedEl.classList.remove('active', 'is-winner');
+          if (this.turnBarCaptionEl) this.turnBarCaptionEl.textContent = isComputer ? this.t('turnBarCaptionAiWinner') : this.t('turnBarCaptionWinner');
+        } else {
+          this.turnStoneRedEl.classList.remove('active', 'is-winner');
+          this.turnStoneYellowEl.classList.remove('active', 'is-winner');
+          if (this.turnBarCaptionEl) this.turnBarCaptionEl.textContent = this.t('turnBarCaptionDraw');
+        }
+      } else {
+        this.turnStoneRedEl.classList.remove('is-winner');
+        this.turnStoneYellowEl.classList.remove('is-winner');
+        this.turnStoneRedEl.classList.toggle('active', isP1);
+        this.turnStoneYellowEl.classList.toggle('active', !isP1);
+        this.turnStoneRedEl.title = isP1 ? `${redLabel} (${this.t('turnBarCaption')})` : redLabel;
+        this.turnStoneYellowEl.title = !isP1 ? `${yellowLabel} (${this.t('turnBarCaption')})` : yellowLabel;
+
+        if (this.turnBarCaptionEl) {
+          if (isReplaying) {
+            this.turnBarCaptionEl.textContent = this.t('turnBarCaptionReplay');
+          } else if (this.isAiTurn) {
+            this.turnBarCaptionEl.textContent = this.t('turnBarCaptionAi');
+          } else {
+            this.turnBarCaptionEl.textContent = this.t('turnBarCaption');
+          }
+        }
+      }
+    }
+
+    // Manueller KI-Button bei Wiederholungen (wenn Gelb/Computer dran ist)
+    if (this.btnManualAiEl) {
+      const showManualAi = isReplaying && !this.gameOver && !isP1 && isComputer;
+      this.btnManualAiEl.style.display = showManualAi ? 'inline-flex' : 'none';
+    }
+
+    // 2. Replay-Zähler in der linken Aktions-Karte
+    if (this.replayStepCounterEl) {
+      this.replayStepCounterEl.textContent = isReplaying 
+        ? this.t('replayMoveOf', { n: currentStep, total: totalMoves }) 
+        : this.t('replayMove', { n: currentStep });
+    }
+    if (this.replayModeTagEl) {
+      this.replayModeTagEl.textContent = isReplaying ? this.t('replayModeReplay') : this.t('replayModeLive');
+      this.replayModeTagEl.className = `replay-mode-tag ${isReplaying ? 'is-replay' : 'is-live'}`;
+    }
+
+    // 3. Ribbon direkt über dem Spielfeld (wird bei Wiederholungen eingeblendet)
+    if (this.boardReplayRibbonEl) {
+      if (isReplaying && !this.gameOver) {
+        this.boardReplayRibbonEl.style.display = 'flex';
+        this.boardReplayRibbonEl.className = `board-replay-ribbon ${pColorClass}`;
+        if (this.ribbonStepCounterEl) {
+          this.ribbonStepCounterEl.textContent = this.t('ribbonStepOf', { current: currentStep, total: totalMoves });
+        }
+        if (this.ribbonTurnDiscEl) {
+          this.ribbonTurnDiscEl.className = `ribbon-disc ${pDiscClass}`;
+        }
+        if (this.ribbonTurnNameEl) {
+          this.ribbonTurnNameEl.textContent = isP1 ? this.t('ribbonRedTurn') : this.t('ribbonYellowTurn');
+        }
+      } else {
+        this.boardReplayRibbonEl.style.display = 'none';
+      }
+    }
+
+    // 4. HUD Turn Pills (aktiver Spieler hat einen blinkenden "NÄCHSTER ZUG" Chip)
+    if (this.p1TurnPillEl) {
+      this.p1TurnPillEl.style.display = (!this.gameOver && isP1) ? 'inline-flex' : 'none';
+    }
+    if (this.p2TurnPillEl) {
+      this.p2TurnPillEl.style.display = (!this.gameOver && !isP1) ? 'inline-flex' : 'none';
+    }
+
+    // 5. Spielfeld-Rahmen Randbeleuchtung
+    if (this.boardFrameEl) {
+      this.boardFrameEl.classList.toggle('turn-red-active', !this.gameOver && isP1);
+      this.boardFrameEl.classList.toggle('turn-yellow-active', !this.gameOver && !isP1);
+      this.boardFrameEl.classList.toggle('replay-mode-active', isReplaying && !this.gameOver);
+    }
+
+    // 6. Spalten-Wahlschalter Pfeilfarben
+    if (this.colSelectorsEl) {
+      this.colSelectorsEl.classList.toggle('next-p1', isP1);
+      this.colSelectorsEl.classList.toggle('next-p2', !isP1);
+    }
+
+    // 7. Zustand des "Bester Zug anzeigen" Buttons
+    if (this.btnShowBestMoveEl) {
+      if (this.gameOver) {
+        this.btnShowBestMoveEl.disabled = true;
+      } else {
+        this.btnShowBestMoveEl.disabled = false;
+        this.btnShowBestMoveEl.title = this.t('bestBtnTitle', { player: pColorName });
+      }
+    }
+    if (this.btnRibbonBestEl) {
+      this.btnRibbonBestEl.disabled = this.gameOver;
+    }
+  }
+
+  /**
+   * Schaltet die visuelle Anzeige des besten Zugs ein oder aus (nur anzeigen, nicht spielen!)
+   */
+  toggleBestMoveHint() {
+    if (this.gameOver) return;
+    if (this.isShowingBestMove) {
+      this.clearBestMoveHint(true);
+    } else {
+      this.displayBestMoveHint();
+    }
+  }
+
+  /**
+   * Berechnet und zeigt den besten Zug für die aktuelle Stellung optisch auf dem Brett an.
+   * Führt den Zug NICHT aus ("Also nur zeigen nicht spielen").
+   */
+  displayBestMoveHint() {
+    if (this.gameOver) return;
+
+    // Vorherige Markierungen bereinigen (Flag bleibt vorerst aktiv)
+    this.clearBestMoveHint(false);
+
+    // Taktische Analyse für den aktuell am Zug befindlichen Spieler ausführen
+    const analysis = this.tutor.analyzeBoard(this.board, this.currentPlayer, this.popOutEnabled);
+    const best = analysis.bestMove;
+
+    if (!best || best.isFull) {
+      if (this.replayBestCardEl) {
+        this.replayBestCardEl.style.display = 'block';
+        if (this.replayBestTargetEl) this.replayBestTargetEl.textContent = this.t('noMovePossible');
+        if (this.replayBestDescEl) this.replayBestDescEl.textContent = this.t('noMoveDesc');
+      }
+      return;
+    }
+
+    this.isShowingBestMove = true;
+
+    // Buttons auf "Ausblenden" umschalten
+    if (this.btnShowBestLabelEl) this.btnShowBestLabelEl.textContent = this.t('hideBestBtn');
+    if (this.bestBtnIconEl) this.bestBtnIconEl.textContent = '✕';
+    if (this.btnShowBestMoveEl) this.btnShowBestMoveEl.classList.add('active-showing');
+    if (this.btnRibbonBestEl) {
+      this.btnRibbonBestEl.classList.add('active-showing');
+      this.btnRibbonBestEl.innerHTML = `<span>✕ ${this.t('hideBestBtn')}</span>`;
+    }
+
+    const isP1 = this.currentPlayer === 1;
+    const isComputer = this.gameMode === 'pvc';
+    const pColorName = isP1 ? this.t('colorRed') : (isComputer ? this.t('colorYellowComputer') : this.t('colorYellowP2'));
+    const colName = this.t('bestColTarget', { col: best.col + 1 });
+
+    // Replay Best-Move Infokarte im linken Panel befüllen
+    if (this.replayBestCardEl) {
+      this.replayBestCardEl.style.display = 'block';
+      if (this.replayBestBadgeEl) {
+        this.replayBestBadgeEl.textContent = `${best.badge} — ${best.qualityLabel || this.t('topRecommendationBadge')}`;
+        this.replayBestBadgeEl.className = `best-tag ${best.badgeClass || 'badge-best'}`;
+      }
+      if (this.replayBestTargetEl) {
+        const actionLabel = best.action === 'pop' ? '▲ Pop-Out' : this.t('actionDrop');
+        const inWord = this.t('prepositionIn');
+        this.replayBestTargetEl.innerHTML = `${actionLabel} ${inWord} <strong>${colName}</strong> <small>(${pColorName})</small>`;
+      }
+      if (this.replayBestDescEl) {
+        const descText = best.explanation || best.tacticalReason || best.headline || '';
+        this.replayBestDescEl.textContent = `${best.headline ? best.headline + ' — ' : ''}${descText}`;
+      }
+    }
+
+    // Visuell auf dem Brett hervorheben (nur zeigen, niemals spielen!)
+    if (best.action === 'drop' && best.row !== -1) {
+      const slot = this.getSlotElement(best.row, best.col);
+      if (slot) {
+        slot.classList.add('best-hint-slot', isP1 ? 'hint-p1' : 'hint-p2');
+
+        const ghost = document.createElement('div');
+        ghost.className = `ghost-disc ghost-best-hint ${isP1 ? 'ghost-p1' : 'ghost-p2'}`;
+
+        let icon = '💡';
+        if (best.type === 'WIN') icon = '👑';
+        else if (best.type === 'MUST_BLOCK') icon = '🛡️';
+        else if (best.type === 'PREEMPTIVE_BLOCK') icon = '🛡️⚡';
+        else if (best.type === 'FORK') icon = '⚡';
+        else if (best.type === 'CENTER') icon = '⭐';
+
+        ghost.innerHTML = `
+          <div class="ghost-hint-inner">
+            <span class="ghost-hint-symbol">${icon}</span>
+            <span class="ghost-hint-tag">${this.t('bestHintTag')}</span>
+          </div>
+        `;
+        slot.appendChild(ghost);
+      }
+
+      // Drop-Button über der Spalte hervorheben
+      const colBtn = this.colSelectorsEl.querySelector(`.col-btn[data-col="${best.col}"]`);
+      if (colBtn) {
+        colBtn.classList.add('best-col-hint', isP1 ? 'hint-p1' : 'hint-p2');
+      }
+
+      const colBadge = document.getElementById(`col-badge-${best.col}`);
+      if (colBadge) {
+        colBadge.textContent = this.t('bestColBadge');
+        colBadge.className = 'col-badge badge-best-hint';
+      }
+    } else if (best.action === 'pop') {
+      // Pop-Out Button hervorheben
+      const popBtn = this.popoutButtonsEl.querySelector(`.pop-btn[data-col="${best.col}"]`);
+      if (popBtn) {
+        popBtn.classList.add('best-pop-hint', isP1 ? 'hint-p1' : 'hint-p2');
+      }
+      const bottomSlot = this.getSlotElement(this.ROWS - 1, best.col);
+      const disc = bottomSlot ? bottomSlot.querySelector('.disc') : null;
+      if (disc) {
+        disc.classList.add('best-pop-disc-hint');
+      }
+    }
+
+    // Taktische Linien-Hervorhebungen
+    if (best.highlights) {
+      if (best.highlights.winLine) {
+        for (const [r, c] of best.highlights.winLine) {
+          const sl = this.getSlotElement(r, c);
+          const disc = sl ? sl.querySelector('.disc') : null;
+          if (disc) disc.classList.add('win-highlight');
+        }
+      }
+      if (best.highlights.oppWinLine) {
+        for (const [r, c] of best.highlights.oppWinLine) {
+          const sl = this.getSlotElement(r, c);
+          const disc = sl ? sl.querySelector('.disc') : null;
+          if (disc) disc.classList.add('threat-highlight');
+        }
+      }
+    }
+
+    // Feedback in Quickbar
+    if (this.tutorQuickMsg) {
+      const bestMoveLabel = this.t('bestMoveFor', { player: pColorName });
+      this.tutorQuickMsg.innerHTML = `<strong>💡 ${bestMoveLabel}:</strong> ${colName} [${best.ratingGrade || best.badge}] — ${best.tacticalReason || best.headline} <em>(${this.t('bestNote')})</em>`;
+    }
+  }
+
+  /**
+   * Entfernt alle visuellen Best-Move Hervorhebungen vom Brett
+   */
+  clearBestMoveHint(resetFlag = true) {
+    if (resetFlag) {
+      this.isShowingBestMove = false;
+    }
+
+    // Alle Ghost-Discs vom Best-Move entfernen
+    const hints = this.boardGridEl.querySelectorAll('.ghost-best-hint');
+    hints.forEach(h => h.remove());
+
+    // Slot-Highlights entfernen
+    const hintSlots = this.boardGridEl.querySelectorAll('.best-hint-slot');
+    hintSlots.forEach(s => s.classList.remove('best-hint-slot', 'hint-p1', 'hint-p2'));
+
+    // Col-Button Highlights entfernen
+    const hintCols = this.colSelectorsEl.querySelectorAll('.best-col-hint');
+    hintCols.forEach(c => c.classList.remove('best-col-hint', 'hint-p1', 'hint-p2'));
+
+    // Badges zurücksetzen
+    this.clearColBadges();
+    if (this.learnMode && this.currentAnalysis) {
+      this.currentAnalysis.moves.forEach((m, c) => {
+        const badgeEl = document.getElementById(`col-badge-${c}`);
+        if (badgeEl) {
+          if (m.isFull) {
+            badgeEl.className = 'col-badge badge-full';
+            badgeEl.textContent = '—';
+          } else {
+            badgeEl.className = `col-badge ${m.badgeClass}`;
+            badgeEl.textContent = m.badge;
+          }
+        }
+      });
+    }
+
+    // Pop-Out Highlights entfernen
+    const popBtns = this.popoutButtonsEl.querySelectorAll('.best-pop-hint');
+    popBtns.forEach(b => b.classList.remove('best-pop-hint', 'hint-p1', 'hint-p2'));
+
+    const popDiscs = this.boardGridEl.querySelectorAll('.best-pop-disc-hint');
+    popDiscs.forEach(d => d.classList.remove('best-pop-disc-hint'));
+
+    // Threat / Win Highlights entfernen
+    const lines = this.boardGridEl.querySelectorAll('.win-highlight, .threat-highlight');
+    lines.forEach(l => l.classList.remove('win-highlight', 'threat-highlight'));
+
+    if (resetFlag) {
+      if (this.btnShowBestLabelEl) this.btnShowBestLabelEl.textContent = this.t('showBestBtn');
+      if (this.bestBtnIconEl) this.bestBtnIconEl.textContent = '💡';
+      if (this.btnShowBestMoveEl) this.btnShowBestMoveEl.classList.remove('active-showing');
+      if (this.btnRibbonBestEl) {
+        this.btnRibbonBestEl.classList.remove('active-showing');
+        this.btnRibbonBestEl.innerHTML = `<span>${this.t('ribbonBestBtn')}</span>`;
+      }
+      if (this.replayBestCardEl) {
+        this.replayBestCardEl.style.display = 'none';
       }
     }
   }

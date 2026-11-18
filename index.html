@@ -17,18 +17,18 @@
       <div class="logo-area">
         <div class="disc-icon disc-red"></div>
         <div class="disc-icon disc-yellow"></div>
-        <h1>Vier Gewinnt <span>Deluxe</span></h1>
+        <h1 id="app-title-text"><span data-i18n="appTitle">Vier Gewinnt Deluxe</span></h1>
       </div>
       <div class="header-actions">
-        <button id="btn-learn-mode" class="btn btn-learn-toggle" title="Lernmodus mit KI-Tutor aktivieren/deaktivieren (Taste L)" aria-label="Lernmodus umschalten">
+        <button id="btn-learn-mode" class="btn btn-learn-toggle" data-i18n-title="learnModeToggleTitle" title="Lernmodus mit KI-Tutor aktivieren/deaktivieren (Taste L)" aria-label="Lernmodus umschalten">
           <span class="learn-icon">🎓</span>
-          <span class="learn-label">Lernmodus: <strong id="learn-mode-status">AUS</strong></span>
+          <span class="learn-label" id="learn-mode-label"><span data-i18n="learnModeLabel">Lernmodus:</span> <strong id="learn-mode-status">AUS</strong></span>
         </button>
-        <button id="btn-sound" class="icon-btn" title="Sound an/aus" aria-label="Sound umschalten">
+        <button id="btn-sound" class="icon-btn" data-i18n-title="toggleSound" title="Sound umschalten" aria-label="Sound umschalten">
           <span id="sound-icon">🔊</span>
         </button>
         <button id="btn-rules" class="btn btn-secondary" title="Spielregeln & Bonus">
-          <span>📖 Regeln</span>
+          <span data-i18n="rulesBtn">📖 Regeln</span>
         </button>
       </div>
     </header>
@@ -38,91 +38,140 @@
       
       <!-- Left Panel: Controls & Mode Selection -->
       <aside class="panel left-panel">
-        <div class="card">
-          <h2>Spielmodus</h2>
-          <div class="mode-selector">
-            <button id="mode-pvc" class="mode-btn active" data-mode="pvc">
-              <span class="icon">🤖</span>
-              <div class="label">
-                <strong>1 Spieler</strong>
-                <small>Gegen die KI</small>
-              </div>
-            </button>
-            <button id="mode-pvp" class="mode-btn" data-mode="pvp">
-              <span class="icon">👥</span>
-              <div class="label">
-                <strong>2 Spieler</strong>
-                <small>Lokal am PC</small>
-              </div>
-            </button>
+        <div class="card card-mode-lang">
+          <!-- Spielmodus auf einer Zeile -->
+          <div class="mode-section">
+            <h2 data-i18n="modeTitle">Spielmodus</h2>
+            <div class="mode-selector-row">
+              <button id="mode-pvc" class="mode-btn mode-btn-row active" data-mode="pvc" data-i18n-title="mode1pTooltip" title="1 Spieler gegen die KI">
+                <span class="mode-icon">🤖</span>
+                <span class="mode-label" data-i18n="mode1p">1 Spieler</span>
+              </button>
+              <button id="mode-pvp" class="mode-btn mode-btn-row" data-mode="pvp" data-i18n-title="mode2pTooltip" title="2 Spieler lokal am PC">
+                <span class="mode-icon">👥</span>
+                <span class="mode-label" data-i18n="mode2p">2 Spieler</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Sprachauswahl Deutsch / Französisch auf dem gewonnenen Platz -->
+          <div class="lang-section">
+            <h2 data-i18n="langTitle">Sprache / Langue</h2>
+            <div class="lang-toggle-group" role="group" aria-label="Sprachauswahl">
+              <button type="button" id="btn-lang-de" class="lang-btn active" data-lang="de" title="Deutsch">
+                <span class="lang-flag">🇩🇪</span>
+                <span class="lang-name">Deutsch</span>
+              </button>
+              <button type="button" id="btn-lang-fr" class="lang-btn" data-lang="fr" title="Français">
+                <span class="lang-flag">🇫🇷</span>
+                <span class="lang-name">Français</span>
+              </button>
+            </div>
           </div>
         </div>
 
         <!-- KI Settings (shown in PvC mode) -->
         <div id="ai-settings-card" class="card">
-          <h2>KI-Spielstärke</h2>
+          <h2 data-i18n="aiTitle">KI-Spielstärke</h2>
           <div class="difficulty-grid">
-            <button class="diff-btn" data-diff="1" title="Suchtiefe 1: Macht Fehler, ideal für Anfänger">
-              <span class="diff-badge green">Stufe 1</span>
-              <strong>Anfänger</strong>
+            <button class="diff-btn" data-diff="1" data-i18n-title="diff1Title" title="Suchtiefe 1: Macht Fehler, ideal für Anfänger">
+              <span class="diff-badge green" data-i18n="diff1Badge">Stufe 1</span>
+              <strong data-i18n="diff1Name">Anfänger</strong>
             </button>
-            <button class="diff-btn active" data-diff="2" title="Suchtiefe 3: Solide Grundtaktik & Zentrumskontrolle">
-              <span class="diff-badge blue">Stufe 2</span>
-              <strong>Fortgeschritten</strong>
+            <button class="diff-btn active" data-diff="2" data-i18n-title="diff2Title" title="Suchtiefe 3: Solide Grundtaktik & Zentrumskontrolle">
+              <span class="diff-badge blue" data-i18n="diff2Badge">Stufe 2</span>
+              <strong data-i18n="diff2Name">Fortgeschritten</strong>
             </button>
-            <button class="diff-btn" data-diff="3" title="Suchtiefe 5: Blickt voraus und stellt Fallen">
-              <span class="diff-badge orange">Stufe 3</span>
-              <strong>Taktiker</strong>
+            <button class="diff-btn" data-diff="3" data-i18n-title="diff3Title" title="Suchtiefe 5: Blickt voraus und stellt Fallen">
+              <span class="diff-badge orange" data-i18n="diff3Badge">Stufe 3</span>
+              <strong data-i18n="diff3Name">Taktiker</strong>
             </button>
-            <button class="diff-btn" data-diff="4" title="Suchtiefe 7+: Nahezu unbesiegbar mit Minimax">
-              <span class="diff-badge red">Stufe 4</span>
-              <strong>Meister</strong>
+            <button class="diff-btn" data-diff="4" data-i18n-title="diff4Title" title="Suchtiefe 7+: Nahezu unbesiegbar mit Minimax">
+              <span class="diff-badge red" data-i18n="diff4Badge">Stufe 4</span>
+              <strong data-i18n="diff4Name">Meister</strong>
             </button>
           </div>
           <div class="ai-status" id="ai-thinking" style="display: none;">
             <div class="spinner"></div>
-            <span>KI berechnet Zug...</span>
+            <span data-i18n="aiThinking">KI berechnet Zug...</span>
           </div>
         </div>
 
-        <!-- Bonus Challenges (Zusatzregeln) -->
-        <div class="card bonus-card">
-          <div class="bonus-title">
-            <span class="bonus-tag">BONUS</span>
-            <h2>Zusatz-Regeln</h2>
+        <!-- Zusatz-Regeln Toggle (Platzsparend Ja / Nein) -->
+        <div class="card bonus-card-compact" id="bonus-card">
+          <div class="bonus-compact-row">
+            <div class="bonus-title-compact">
+              <span class="bonus-tag" data-i18n="bonusTag">BONUS</span>
+              <h2 data-i18n="bonusTitle">Zusatzregeln</h2>
+            </div>
+            
+            <div class="bonus-toggle-switch" role="group" aria-label="Zusatzregeln aktivieren">
+              <button type="button" id="btn-bonus-no" class="bonus-btn-toggle active" data-val="no" data-i18n="bonusNo">Nein</button>
+              <button type="button" id="btn-bonus-yes" class="bonus-btn-toggle" data-val="yes" data-i18n="bonusYes">Ja</button>
+            </div>
           </div>
-          
-          <label class="toggle-option" title="Jeder Spieler darf im eigenen Zug seinen untersten Stein herausziehen. Alle Steine darüber rutschen nach!">
-            <div class="toggle-info">
-              <strong>Pop-Out Regel</strong>
-              <small>Untersten eigenen Stein herausziehen</small>
-            </div>
-            <input type="checkbox" id="toggle-popout">
-            <span class="toggle-slider"></span>
-          </label>
 
-          <label class="toggle-option" title="2 zufällige Felder sind blockiert und können nicht bespielt werden!">
-            <div class="toggle-info">
-              <strong>Sperrfelder</strong>
-              <small>2 blockierte Hindernisfelder</small>
-            </div>
-            <input type="checkbox" id="toggle-obstacles">
-            <span class="toggle-slider"></span>
-          </label>
+          <!-- Dieser Detailblock wird NUR bei 'Ja' angezeigt -->
+          <div id="bonus-rules-drawer" class="bonus-rules-drawer" style="display: none;">
+            <label class="toggle-option" id="lbl-toggle-popout" data-i18n-title="popoutTooltip" title="Jeder Spieler darf im eigenen Zug seinen untersten Stein herausziehen. Alle Steine darüber rutschen nach!">
+              <div class="toggle-info">
+                <strong data-i18n="popoutTitle">Pop-Out Regel</strong>
+                <small data-i18n="popoutDesc">Untersten eigenen Stein herausziehen</small>
+              </div>
+              <input type="checkbox" id="toggle-popout">
+              <span class="toggle-slider"></span>
+            </label>
+
+            <label class="toggle-option" id="lbl-toggle-obstacles" data-i18n-title="obstaclesTooltip" title="2 zufällige Felder sind blockiert und können nicht bespielt werden!">
+              <div class="toggle-info">
+                <strong data-i18n="obstaclesTitle">Sperrfelder</strong>
+                <small data-i18n="obstaclesDesc">2 blockierte Hindernisfelder</small>
+              </div>
+              <input type="checkbox" id="toggle-obstacles">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
         </div>
 
         <!-- Action Controls -->
         <div class="card actions-card">
           <button id="btn-restart" class="btn btn-primary full-width">
-            <span>🔄 Neues Spiel</span>
+            <span data-i18n="newGameBtn">🔄 Neues Spiel</span>
           </button>
           <div class="history-controls-row">
-            <button id="btn-undo" class="btn btn-secondary full-width" title="Einen Stein zurücknehmen (Taste U oder Strg+Z)">
-              <span>↩ Zurück</span>
+            <button id="btn-undo" class="btn btn-secondary full-width" data-i18n-title="undoTooltip" title="Einen Stein zurücknehmen (Taste U oder Strg+Z)">
+              <span id="lbl-btn-undo" data-i18n="undoBtn">↩ Zurück</span>
             </button>
-            <button id="btn-redo" class="btn btn-secondary full-width" title="Einen Stein vorwärtsgehen (Taste V oder Strg+Y)">
-              <span>Vor ↪</span>
+            <button id="btn-redo" class="btn btn-secondary full-width" data-i18n-title="redoTooltip" title="Einen Stein vorwärtsgehen (Taste V oder Strg+Y)">
+              <span id="lbl-btn-redo" data-i18n="redoBtn">Vor ↪</span>
             </button>
+          </div>
+
+          <!-- Spezieller Wiederholungs- & Analyse-Bereich -->
+          <div id="replay-panel" class="replay-panel">
+            <div class="replay-divider"></div>
+            
+            <div class="replay-status-row">
+              <span class="replay-mode-tag" id="replay-mode-tag">⏮️ Zug-Wiederholung</span>
+              <span class="replay-step-counter" id="replay-step-counter">Zug 0 / 0</span>
+            </div>
+
+            <!-- Button: Bester Zug anzeigen (nur zeigen, nicht spielen!) -->
+            <button id="btn-show-best-move" class="btn btn-best-move full-width" title="Zeigt den besten Zug für die aktuelle Stellung auf dem Brett (Taste B)">
+              <span class="best-btn-icon" id="best-btn-icon">💡</span>
+              <span id="btn-show-best-label" data-i18n="showBestBtn">Besten Zug anzeigen</span>
+            </button>
+
+            <!-- Erklärungskarte wenn Bester Zug aktiv ist -->
+            <div id="replay-best-card" class="replay-best-card" style="display: none;">
+              <div class="replay-best-card-header">
+                <span id="replay-best-badge" class="best-tag" data-i18n="bestRecommendationTag">💡 Empfehlung</span>
+                <button id="btn-hide-best" class="btn-hide-best" data-i18n-title="hideBestBtn" data-i18n-aria="closeBtnAria" title="Vorschau ausblenden" aria-label="Schließen">✕</button>
+              </div>
+              <div class="replay-best-target" id="replay-best-target">Spalte 4</div>
+              <p class="replay-best-desc" id="replay-best-desc">Zentrumskontrolle: Eröffnet die meisten Kombinationen.</p>
+              <div class="replay-best-note" data-i18n="bestNote">ℹ️ Nur visuelle Vorschau — Zug wird nicht ausgeführt</div>
+            </div>
           </div>
         </div>
       </aside>
@@ -130,36 +179,13 @@
       <!-- Center: Game Board & Status -->
       <section class="board-section">
         
-        <!-- Scoreboard & Turn Display -->
-        <div class="game-hud">
-          <div class="player-badge p1-badge active" id="p1-hud">
-            <div class="disc-avatar disc-red"></div>
-            <div class="hud-details">
-              <span class="name" id="p1-name">Spieler 1 (Rot)</span>
-              <span class="score" id="p1-score">0 Siege</span>
-            </div>
-          </div>
-
-          <div class="turn-indicator" id="turn-indicator">
-            <span id="turn-text">Rot ist am Zug</span>
-          </div>
-
-          <div class="player-badge p2-badge" id="p2-hud">
-            <div class="hud-details right-align">
-              <span class="name" id="p2-name">Computer (Gelb)</span>
-              <span class="score" id="p2-score">0 Siege</span>
-            </div>
-            <div class="disc-avatar disc-yellow"></div>
-          </div>
-        </div>
-
         <!-- Tutor Live Quickbar (visible in Learn Mode) -->
         <div class="tutor-quickbar" id="tutor-quickbar" style="display: none;">
           <div class="tutor-quick-badge">
             <span class="tutor-avatar-mini">🎓</span>
-            <span class="tutor-name-mini">Tutor-Coach:</span>
+            <span class="tutor-name-mini" data-i18n="tutorQuickBadge">Tutor-Coach:</span>
           </div>
-          <div class="tutor-quick-msg" id="tutor-quick-msg">
+          <div class="tutor-quick-msg" id="tutor-quick-msg" data-i18n="tutorQuickWelcome">
             Fahre mit der Maus über die Spalten oder wähle einen Zug, um die Analyse zu sehen.
           </div>
         </div>
@@ -186,6 +212,25 @@
           </div>
         </div>
 
+        <!-- Replay Ribbon direkt über dem Spielfeld -->
+        <div class="board-replay-ribbon" id="board-replay-ribbon" style="display: none;">
+          <div class="ribbon-left">
+            <span class="ribbon-tag" data-i18n="ribbonTag">⏮️ WIEDERHOLUNG</span>
+            <span class="ribbon-counter" id="ribbon-step-counter">Zug 4 / 12</span>
+            <span class="ribbon-divider">•</span>
+            <span class="ribbon-turn-label" data-i18n="ribbonNextTurn">Nächster Zug:</span>
+            <span class="ribbon-turn-player" id="ribbon-turn-player">
+              <span class="ribbon-disc disc-red" id="ribbon-turn-disc"></span>
+              <strong id="ribbon-turn-name">Rot ist dran</strong>
+            </span>
+          </div>
+          <div class="ribbon-actions">
+            <button id="btn-ribbon-best" class="btn-ribbon-best" data-i18n-title="ribbonBestBtnTitle" title="Besten Zug auf dem Brett anzeigen (Taste B)">
+              <span data-i18n="ribbonBestBtn">💡 Bester Zug</span>
+            </button>
+          </div>
+        </div>
+
         <!-- Column Drop Hover Indicators -->
         <div class="column-selectors" id="column-selectors">
           <button class="col-btn" data-col="0"><span class="col-badge" id="col-badge-0"></span><span class="col-arrow">▼</span></button>
@@ -204,9 +249,29 @@
           </div>
         </div>
 
+        <!-- Platzsparende Farbanzeige direkt unter dem Spielfeld mit rotem und gelbem Steinchen -->
+        <div class="board-turn-bar" id="board-turn-bar">
+          <span class="turn-bar-label" id="turn-bar-caption" data-i18n="turnBarCaption">Am Zug:</span>
+          <div class="turn-stone-pair">
+            <!-- Rotes Steinchen -->
+            <div class="turn-stone-pill active" id="turn-stone-red" title="Rot ist am Zug">
+              <span class="turn-stone-disc disc-red"></span>
+              <span class="turn-stone-text" id="turn-stone-red-text">Rot</span>
+              <span class="turn-stone-arrow">◀</span>
+            </div>
+            <!-- Gelbes Steinchen -->
+            <div class="turn-stone-pill" id="turn-stone-yellow" title="Computer (Gelb) ist am Zug">
+              <span class="turn-stone-arrow">▶</span>
+              <span class="turn-stone-disc disc-yellow"></span>
+              <span class="turn-stone-text" id="turn-stone-yellow-text">Gelb (Computer)</span>
+            </div>
+            <button id="btn-manual-ai" class="btn-mini-ai" data-i18n="manualAiBtn" data-i18n-title="manualAiBtnTitle" title="KI den nächsten Zug berechnen und ausführen lassen" style="display: none;">🤖 KI ziehen lassen</button>
+          </div>
+        </div>
+
         <!-- Pop-Out Control Bar (visible when Pop-Out is active) -->
         <div class="popout-bar" id="popout-bar" style="display: none;">
-          <span class="popout-label">Pop-Out (Stein unten entfernen):</span>
+          <span class="popout-label" data-i18n="popoutBarLabel">Pop-Out (Stein unten entfernen):</span>
           <div class="popout-buttons" id="popout-buttons">
             <button class="pop-btn" data-col="0" title="Spalte 1 Pop-Out">▲ 1</button>
             <button class="pop-btn" data-col="1" title="Spalte 2 Pop-Out">▲ 2</button>
@@ -228,37 +293,37 @@
             <div class="tutor-profile">
               <div class="tutor-avatar">🎓</div>
               <div class="tutor-title-box">
-                <h2>KI-Tutor Prof. Vier</h2>
-                <span class="tutor-subtitle">Taktik- & Strategie-Coach</span>
+                <h2 data-i18n="tutorCoachHeader">KI-Tutor Prof. Vier</h2>
+                <span class="tutor-subtitle" data-i18n="tutorCoachRole">Taktik- & Strategie-Coach</span>
               </div>
             </div>
-            <span class="tutor-live-pulse" title="Tutor analysiert das Spielfeld in Echtzeit">● LIVE</span>
+            <span class="tutor-live-pulse" data-i18n-title="tutorLivePulseTitle" title="Tutor analysiert das Spielfeld in Echtzeit">● LIVE</span>
           </div>
 
           <!-- Coach Speech Bubble -->
           <div class="coach-bubble" id="coach-bubble">
             <div class="bubble-header">
               <span id="coach-mood-icon">💡</span>
-              <strong id="coach-mood-title">Taktische Lage</strong>
+              <strong id="coach-mood-title" data-i18n="coachMoodTitle">Taktische Lage</strong>
             </div>
-            <p id="coach-text">Willkommen! Ich analysiere das Spiel live. Fahre mit der Maus über die Spalten oder sieh dir meine Tipps an.</p>
+            <p id="coach-text" data-i18n="coachWelcomeText">Willkommen! Ich analysiere das Spiel live. Fahre mit der Maus über die Spalten oder sieh dir meine Tipps an.</p>
           </div>
 
           <!-- Best Move Highlight Box -->
           <div class="best-move-container" id="best-move-container">
-            <span class="section-label">Empfohlener Zug:</span>
+            <span class="section-label" data-i18n="recommendedMoveLabel">Empfohlener Zug:</span>
             <div class="best-move-badge" id="best-move-badge">
               <div class="best-move-main">
-                <span class="best-move-col" id="best-move-col">Spalte 4</span>
-                <span class="best-move-tag" id="best-move-tag">Top-Empfehlung</span>
+                <span class="best-move-col" id="best-move-col" data-i18n="bestMoveColDefault">Spalte 4</span>
+                <span class="best-move-tag" id="best-move-tag" data-i18n="topRecommendationBadge">Top-Empfehlung</span>
               </div>
-              <p class="best-move-reason" id="best-move-reason">Zentrumskontrolle: Eröffnet die meisten 4er-Kombinationen.</p>
+              <p class="best-move-reason" id="best-move-reason" data-i18n="bestMoveReasonDefault">Zentrumskontrolle: Eröffnet die meisten 4er-Kombinationen.</p>
             </div>
           </div>
 
           <!-- Column Evaluator Accordion / List -->
           <div class="tutor-columns-overview">
-            <span class="section-label">Spalten-Analyse (Fahre mit Maus drüber):</span>
+            <span class="section-label" data-i18n="colAnalysisLabel">Spalten-Analyse (Fahre mit Maus drüber):</span>
             <div class="tutor-col-list" id="tutor-col-list">
               <!-- Dynamisch durch JS befüllt -->
             </div>
@@ -267,20 +332,20 @@
           <!-- Strategy Section & Modal Trigger -->
           <div class="tutor-strategy-box">
             <div class="strategy-tip-header">
-              <span>🎯 Akademie & Strategie-Zentrum</span>
+              <span data-i18n="academySectionLabel">🎯 Akademie & Strategie-Zentrum</span>
             </div>
-            <p id="tutor-strategy-tip" class="strategy-tip-text">
+            <p id="tutor-strategy-tip" class="strategy-tip-text" data-i18n="strategyTipDefault">
               Die Spalte 4 in der Mitte ist das Herzstück des Spiels. Wer das Zentrum beherrscht, diktiert das Geschehen!
             </p>
             <div class="tutor-academy-buttons">
-              <button id="btn-open-openings" class="btn btn-secondary btn-sm full-width" title="Wichtigste Varianten der ersten Züge in Grafik ansehen">
-                <span>🌟 Eröffnungsvarianten (Grafik)</span>
+              <button id="btn-open-openings" class="btn btn-secondary btn-sm full-width" data-i18n-title="btnOpenOpeningsTitle" title="Wichtigste Varianten der ersten Züge in Grafik ansehen">
+                <span data-i18n="btnOpenOpenings">🌟 Eröffnungsvarianten (Grafik)</span>
               </button>
-              <button id="btn-open-blunders" class="btn btn-secondary btn-sm full-width" title="Häufigste gravierende Fehler mit Grafik studieren">
-                <span>⚠️ Häufigste gravierende Fehler</span>
+              <button id="btn-open-blunders" class="btn btn-secondary btn-sm full-width" data-i18n-title="btnOpenBlundersTitle" title="Häufigste gravierende Fehler mit Grafik studieren">
+                <span data-i18n="btnOpenBlunders">⚠️ Häufigste gravierende Fehler</span>
               </button>
-              <button id="btn-open-strategies" class="btn btn-secondary btn-sm full-width" title="Die 6 goldenen Grundstrategien lernen">
-                <span>📚 6 Grundstrategien lernen</span>
+              <button id="btn-open-strategies" class="btn btn-secondary btn-sm full-width" data-i18n-title="btnOpenStrategiesTitle" title="Die 6 goldenen Grundstrategien lernen">
+                <span data-i18n="btnOpenStrategies">📚 6 Grundstrategien lernen</span>
               </button>
             </div>
           </div>
@@ -291,52 +356,60 @@
           <div class="teaser-content">
             <div class="teaser-icon">🎓</div>
             <div class="teaser-text">
-              <strong>KI-Lernmodus</strong>
-              <small>Lerne Meisterstrategien, Vorlagen-Vermeidung & Gabeln mit Live-Coach Prof. Vier!</small>
+              <strong data-i18n="tutorTeaserTitle">KI-Lernmodus</strong>
+              <small data-i18n="tutorTeaserDesc">Lerne Meisterstrategien, Vorlagen-Vermeidung & Gabeln mit Live-Coach Prof. Vier!</small>
             </div>
           </div>
           <button id="btn-activate-learn" class="btn btn-primary full-width" style="margin-top: 10px;">
-            <span>🎓 Lernmodus aktivieren</span>
+            <span data-i18n="tutorActivateBtn">🎓 Lernmodus aktivieren</span>
           </button>
         </div>
 
         <div class="card stats-card">
-          <h2>Match-Statistik</h2>
+          <h2 data-i18n="statsTitle">Match-Statistik</h2>
           <div class="stat-row">
-            <span>Gespielte Runden:</span>
+            <span data-i18n="statP1Wins">Siege Rot:</span>
+            <strong id="stat-p1-wins" class="stat-win-red">0</strong>
+          </div>
+          <div class="stat-row">
+            <span id="stat-p2-label">Siege Gelb (Computer):</span>
+            <strong id="stat-p2-wins" class="stat-win-yellow">0</strong>
+          </div>
+          <div class="stat-row">
+            <span data-i18n="statRounds">Gespielte Runden:</span>
             <strong id="stat-rounds">0</strong>
           </div>
           <div class="stat-row">
-            <span>Unentschieden:</span>
+            <span data-i18n="statDraws">Unentschieden:</span>
             <strong id="stat-draws">0</strong>
           </div>
           <div class="stat-row">
-            <span>Züge in dieser Runde:</span>
+            <span data-i18n="statMoves">Züge in dieser Runde:</span>
             <strong id="stat-moves">0</strong>
           </div>
         </div>
 
         <div class="card algo-card">
-          <h2>KI-Einblick</h2>
+          <h2 data-i18n="algoTitle">KI-Einblick</h2>
           <div class="algo-box">
             <div class="algo-stat">
-              <span class="label">Algorithmus:</span>
-              <strong class="highlight">Minimax + &alpha;&beta;-Pruning</strong>
+              <span class="label" data-i18n="algoLabel">Algorithmus:</span>
+              <strong class="highlight" data-i18n="algoName">Minimax + &alpha;&beta;-Pruning</strong>
             </div>
             <div class="algo-stat">
-              <span class="label">Aktuelle Rechentiefe:</span>
+              <span class="label" data-i18n="algoDepthLabel">Aktuelle Rechentiefe:</span>
               <strong id="algo-depth">3 Züge</strong>
             </div>
             <div class="algo-stat">
-              <span class="label">Geprüfte Stellungen:</span>
+              <span class="label" data-i18n="algoNodesLabel">Geprüfte Stellungen:</span>
               <strong id="algo-nodes">0</strong>
             </div>
             <div class="algo-stat">
-              <span class="label">Berechnungszeit:</span>
+              <span class="label" data-i18n="algoTimeLabel">Berechnungszeit:</span>
               <strong id="algo-time">0 ms</strong>
             </div>
           </div>
-          <p class="algo-hint">
+          <p class="algo-hint" data-i18n="algoDesc">
             Die KI analysiert alle möglichen Folgezüge, schneidet schlechte Äste mit <em>&alpha;-&beta;-Schnitten</em> sofort ab und bewertet Zentrumskontrolle und Drohungen.
           </p>
         </div>
@@ -348,48 +421,88 @@
     <div class="modal-backdrop" id="rules-modal" style="display: none;">
       <div class="modal-card">
         <div class="modal-header">
-          <h2>📖 Spielregeln & Bonus-Herausforderung</h2>
+          <h2 data-i18n="rulesModalHeading">📖 Spielregeln & Bonus-Herausforderung</h2>
           <button class="close-btn" id="btn-close-modal">&times;</button>
         </div>
         <div class="modal-body">
-          <h3>Klassische Regeln</h3>
-          <p>
-            Zwei Spieler lassen abwechselnd Steine in 7 Spalten fallen. Ein Stein fällt immer auf den tiefsten freien Platz der gewählten Spalte. 
-            Wer als Erster <strong>4 Steine in einer horizontalen, vertikalen oder diagonalen Linie</strong> platziert, gewinnt das Spiel!
-          </p>
-
-          <hr>
-
-          <h3>🌟 Bonus-Zusatzregeln (Aktivierbar in den Einstellungen)</h3>
-          
-          <div class="rule-feature">
-            <strong>1. Pop-Out Regel:</strong>
+          <div class="lang-block-de">
+            <h3>Klassische Regeln</h3>
             <p>
-              In deinem Zug musst du keinen neuen Stein oben hineinwerfen – du kannst stattdessen <em>deinen eigenen untersten Stein</em> einer Spalte herausziehen! 
-              Alle Steine darüber fallen um eine Position nach unten. Das kann völlig überraschende 4er-Ketten auslösen oder gegnerische Fallen zerstören.
+              Zwei Spieler lassen abwechselnd Steine in 7 Spalten fallen. Ein Stein fällt immer auf den tiefsten freien Platz der gewählten Spalte. 
+              Wer als Erster <strong>4 Steine in einer horizontalen, vertikalen oder diagonalen Linie</strong> platziert, gewinnt das Spiel!
             </p>
+
+            <hr>
+
+            <h3>🌟 Bonus-Zusatzregeln (Aktivierbar in den Einstellungen)</h3>
+            
+            <div class="rule-feature">
+              <strong>1. Pop-Out Regel:</strong>
+              <p>
+                In deinem Zug musst du keinen neuen Stein oben hineinwerfen – du kannst stattdessen <em>deinen eigenen untersten Stein</em> einer Spalte herausziehen! 
+                Alle Steine darüber fallen um eine Position nach unten. Das kann völlig überraschende 4er-Ketten auslösen oder gegnerische Fallen zerstören.
+              </p>
+            </div>
+
+            <div class="rule-feature">
+              <strong>2. Sperrfelder (Hindernisse):</strong>
+              <p>
+                Zu Beginn jeder Runde werden zwei zufällige Felder als Hindernisse markiert (graue Barrieren). Diese Felder können nicht belegt werden – 
+                sie verändern alle Standard-Strategien und verlangen völlig neue Taktiken von Mensch und KI!
+              </p>
+            </div>
+
+            <hr>
+
+            <h3>🤖 Die 4 KI-Stufen</h3>
+            <ul>
+              <li><strong>Stufe 1 (Anfänger):</strong> Suchtiefe 1. Übersieht Fallen, spielt gelegentlich zufällig.</li>
+              <li><strong>Stufe 2 (Fortgeschritten):</strong> Suchtiefe 3. Achtet auf das Zentrum und blockt direkte 3er-Reihen.</li>
+              <li><strong>Stufe 3 (Taktiker):</strong> Suchtiefe 5. Erkennt Doppelbedrohungen ("Gabeln") mehrere Züge im Voraus.</li>
+              <li><strong>Stufe 4 (Meister):</strong> Suchtiefe 7+. Nutzt die volle Power des Minimax-Algorithmus mit Alpha-Beta-Astschnitt.</li>
+            </ul>
           </div>
 
-          <div class="rule-feature">
-            <strong>2. Sperrfelder (Hindernisse):</strong>
+          <div class="lang-block-fr" style="display: none;">
+            <h3>Règles Classiques</h3>
             <p>
-              Zu Beginn jeder Runde werden zwei zufällige Felder als Hindernisse markiert (graue Barrieren). Diese Felder können nicht belegt werden – 
-              sie verändern alle Standard-Strategien und verlangen völlig neue Taktiken von Mensch und KI!
+              Deux joueurs font glisser à tour de rôle des jetons dans 7 colonnes. Chaque jeton tombe au niveau le plus bas disponible de la colonne.
+              Le premier joueur à aligner <strong>4 jetons horizontalement, verticalement ou en diagonale</strong> remporte la partie !
             </p>
+
+            <hr>
+
+            <h3>🌟 Règles Spéciales Bonus (Activables dans les réglages)</h3>
+            
+            <div class="rule-feature">
+              <strong>1. Règle Pop-Out :</strong>
+              <p>
+                À votre tour, vous pouvez choisir de ne pas insérer de nouveau jeton en haut : vous pouvez à la place <em>retirer votre propre jeton tout en bas</em> d'une colonne ! 
+                Tous les jetons situés au-dessus descendent d'un cran. Cela peut déclencher des alignements de 4 inattendus ou détruire les pièges de l'adversaire.
+              </p>
+            </div>
+
+            <div class="rule-feature">
+              <strong>2. Cases Bloquées (Obstacles) :</strong>
+              <p>
+                Au début de chaque manche, deux cases aléatoires sont bloquées par des barrières grises. Aucun jeton ne peut y être placé, 
+                ce qui bouleverse les stratégies habituelles et exige de nouvelles tactiques de la part de l'humain et de l'IA !
+              </p>
+            </div>
+
+            <hr>
+
+            <h3>🤖 Les 4 Niveaux de l'IA</h3>
+            <ul>
+              <li><strong>Niveau 1 (Débutant) :</strong> Profondeur 1. Fait des erreurs et joue parfois au hasard.</li>
+              <li><strong>Niveau 2 (Intermédiaire) :</strong> Profondeur 3. Contrôle le centre et bloque les alignements directs de 3.</li>
+              <li><strong>Niveau 3 (Tacticien) :</strong> Profondeur 5. Anticipe les doubles menaces (« fourchettes ») plusieurs coups à l'avance.</li>
+              <li><strong>Niveau 4 (Maître) :</strong> Profondeur 7+. Déploie toute la puissance de l'algorithme Minimax avec élagage Alpha-Bêta.</li>
+            </ul>
           </div>
-
-          <hr>
-
-          <h3>🤖 Die 4 KI-Stufen</h3>
-          <ul>
-            <li><strong>Stufe 1 (Anfänger):</strong> Suchtiefe 1. Übersieht Fallen, spielt gelegentlich zufällig.</li>
-            <li><strong>Stufe 2 (Fortgeschritten):</strong> Suchtiefe 3. Achtet auf das Zentrum und blockt direkte 3er-Reihen.</li>
-            <li><strong>Stufe 3 (Taktiker):</strong> Suchtiefe 5. Erkennt Doppelbedrohungen ("Gabeln") mehrere Züge im Voraus.</li>
-            <li><strong>Stufe 4 (Meister):</strong> Suchtiefe 7+. Nutzt die volle Power des Minimax-Algorithmus mit Alpha-Beta-Astschnitt.</li>
-          </ul>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-primary" id="btn-close-modal-footer">Verstanden & Loslegen</button>
+          <button class="btn btn-primary" id="btn-close-modal-footer" data-i18n="rulesModalCloseBtn">Verstanden & Loslegen</button>
         </div>
       </div>
     </div>
@@ -400,21 +513,21 @@
         <div class="modal-header">
           <div class="modal-header-title">
             <span class="academy-badge">🎓 MEISTER-AKADEMIE</span>
-            <h2>Vier-Gewinnt Taktik- & Strategie-Zentrum</h2>
+            <h2 data-i18n="academyModalTitle">Vier-Gewinnt Taktik- & Strategie-Zentrum</h2>
           </div>
-          <button class="close-btn" id="btn-close-strategy-modal">&times;</button>
+          <button class="close-btn" id="btn-close-strategy-modal" data-i18n-aria="closeBtnAria" aria-label="Schließen">&times;</button>
         </div>
 
         <!-- Modal Tabs Header -->
         <div class="modal-tabs">
           <button class="modal-tab-btn active" data-tab="openings">
-            <span>🌟 Eröffnungsvarianten (Erste Züge)</span>
+            <span data-i18n="tabOpenings">🌟 Eröffnungsvarianten (Erste Züge)</span>
           </button>
           <button class="modal-tab-btn" data-tab="blunders">
-            <span>⚠️ Häufigste gravierende Fehler</span>
+            <span data-i18n="tabBlunders">⚠️ Häufigste gravierende Fehler</span>
           </button>
           <button class="modal-tab-btn" data-tab="strategies">
-            <span>📚 6 Grundstrategien</span>
+            <span data-i18n="tabStrategies">📚 6 Grundstrategien</span>
           </button>
         </div>
 
@@ -1101,6 +1214,7 @@
   </div>
 
   <!-- Scripts -->
+  <script src="i18n.js"></script>
   <script src="ai.js"></script>
   <script src="tutor.js"></script>
   <script src="game.js"></script>
