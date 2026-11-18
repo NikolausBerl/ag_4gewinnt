@@ -116,9 +116,14 @@
           <button id="btn-restart" class="btn btn-primary full-width">
             <span>🔄 Neues Spiel</span>
           </button>
-          <button id="btn-undo" class="btn btn-secondary full-width" title="Letzten Zug zurücknehmen">
-            <span>↩ Zug zurück</span>
-          </button>
+          <div class="history-controls-row">
+            <button id="btn-undo" class="btn btn-secondary full-width" title="Einen Stein zurücknehmen (Taste U oder Strg+Z)">
+              <span>↩ Zurück</span>
+            </button>
+            <button id="btn-redo" class="btn btn-secondary full-width" title="Einen Stein vorwärtsgehen (Taste V oder Strg+Y)">
+              <span>Vor ↪</span>
+            </button>
+          </div>
         </div>
       </aside>
 
@@ -174,9 +179,6 @@
             </div>
           </div>
           <div class="gameover-banner-actions">
-            <button id="btn-banner-undo" class="btn btn-secondary" title="Letzten Zug zurücknehmen und Position weiterspielen">
-              <span>↩ Zug zurück</span>
-            </button>
             <button id="btn-play-again" class="btn btn-primary btn-glow" title="Neues Spiel starten und Brett leeren">
               <span>🔄 Neues Spiel</span>
             </button>
@@ -265,14 +267,22 @@
           <!-- Strategy Section & Modal Trigger -->
           <div class="tutor-strategy-box">
             <div class="strategy-tip-header">
-              <span>🎯 Strategie-Impuls</span>
+              <span>🎯 Akademie & Strategie-Zentrum</span>
             </div>
             <p id="tutor-strategy-tip" class="strategy-tip-text">
               Die Spalte 4 in der Mitte ist das Herzstück des Spiels. Wer das Zentrum beherrscht, diktiert das Geschehen!
             </p>
-            <button id="btn-open-strategies" class="btn btn-secondary btn-sm full-width">
-              <span>📚 6 Grundstrategien lernen</span>
-            </button>
+            <div class="tutor-academy-buttons">
+              <button id="btn-open-openings" class="btn btn-secondary btn-sm full-width" title="Wichtigste Varianten der ersten Züge in Grafik ansehen">
+                <span>🌟 Eröffnungsvarianten (Grafik)</span>
+              </button>
+              <button id="btn-open-blunders" class="btn btn-secondary btn-sm full-width" title="Häufigste gravierende Fehler mit Grafik studieren">
+                <span>⚠️ Häufigste gravierende Fehler</span>
+              </button>
+              <button id="btn-open-strategies" class="btn btn-secondary btn-sm full-width" title="Die 6 goldenen Grundstrategien lernen">
+                <span>📚 6 Grundstrategien lernen</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -384,159 +394,703 @@
       </div>
     </div>
 
-    <!-- Modal: Strategy Academy (Grundstrategien) -->
+    <!-- Modal: Strategy Academy (Eröffnungsvarianten, Fehler & Grundstrategien) -->
     <div class="modal-backdrop" id="strategy-modal" style="display: none;">
       <div class="modal-card strategy-modal-card">
         <div class="modal-header">
           <div class="modal-header-title">
-            <span class="academy-badge">🎓 AKADEMIE</span>
-            <h2>Die 6 goldenen Vier-Gewinnt Grundstrategien</h2>
+            <span class="academy-badge">🎓 MEISTER-AKADEMIE</span>
+            <h2>Vier-Gewinnt Taktik- & Strategie-Zentrum</h2>
           </div>
           <button class="close-btn" id="btn-close-strategy-modal">&times;</button>
         </div>
+
+        <!-- Modal Tabs Header -->
+        <div class="modal-tabs">
+          <button class="modal-tab-btn active" data-tab="openings">
+            <span>🌟 Eröffnungsvarianten (Erste Züge)</span>
+          </button>
+          <button class="modal-tab-btn" data-tab="blunders">
+            <span>⚠️ Häufigste gravierende Fehler</span>
+          </button>
+          <button class="modal-tab-btn" data-tab="strategies">
+            <span>📚 6 Grundstrategien</span>
+          </button>
+        </div>
+
         <div class="modal-body strategy-modal-body">
-          <p class="academy-intro">
-            Vier Gewinnt ist kein reines Zufallsspiel, sondern ein <strong>mathematisch gelöstes Strategiespiel</strong>. 
-            Mit diesen 6 Grundregeln unseres KI-Tutors wirst du deine Spielstärke sofort dramatisch steigern!
-          </p>
+          
+          <!-- ========================================================
+               TAB 1: ERÖFFNUNGSVARIANTEN & ERSTE ZÜGE (GRAFIK & WARUM)
+               ======================================================== -->
+          <div class="tab-pane active" id="tab-openings">
+            <p class="academy-intro">
+              Vier Gewinnt ist mathematisch gelöst (Allen & Allis, 1988): <strong>Spieler 1 (Rot) gewinnt bei perfektem Spiel forciert</strong> – 
+              aber <em>ausschließlich dann</em>, wenn der 1. Stein in die <strong>mittlere Spalte 4</strong> geworfen wird! 
+              Jede andere Eröffnung führt bei bestem Spiel entweder zum Remis oder direkt zur forcierten Niederlage.
+            </p>
 
-          <div class="strategies-grid">
-            <!-- 1. Zentrumskontrolle -->
-            <div class="strategy-card">
-              <div class="strategy-card-header">
-                <span class="strategy-num">1</span>
-                <div class="strategy-meta">
-                  <span class="strategy-tag opening">Eröffnung</span>
-                  <h3>Die Macht der Mitte (Zentrumskontrolle)</h3>
+            <!-- Eröffnungs-Kompass: Säulenbewertung der Spalten 1-7 -->
+            <div class="openings-compass-card">
+              <div class="openings-compass-header">
+                <h3>🧭 Der Eröffnungs-Kompass: Bewertung des allerersten Zugs</h3>
+                <p>Anzahl der möglichen 4er-Gewinnketten, die durch die jeweilige Spalte verlaufen (insgesamt 69 Gewinnlinien):</p>
+              </div>
+
+              <div class="openings-chart">
+                <!-- Spalte 1 -->
+                <div class="chart-bar-col">
+                  <span class="bar-tag tag-fatal">❌ Verlust</span>
+                  <div class="bar-track">
+                    <div class="bar-fill bar-fatal" style="height: 19%;">3</div>
+                  </div>
+                  <span class="bar-col-num">Sp. 1</span>
+                  <span class="bar-lines">3 Linien</span>
                 </div>
-                <span class="strategy-icon">🎯</span>
-              </div>
-              <p>
-                Von den 69 möglichen Viererketten laufen <strong>16 Linien direkt durch die mittlere Spalte 4</strong>. 
-                Am Außenrand (Spalte 1 und 7) sind es nur jeweils 3 Linien! Wer die Mitte besitzt, kontrolliert das Spiel.
-              </p>
-              <div class="strategy-mini-board center-preview">
-                <div class="mini-col">3</div>
-                <div class="mini-col">7</div>
-                <div class="mini-col">13</div>
-                <div class="mini-col active-center">16 ★</div>
-                <div class="mini-col">13</div>
-                <div class="mini-col">7</div>
-                <div class="mini-col">3</div>
-              </div>
-              <div class="pro-tip">
-                <strong>💡 Profi-Tipp:</strong> Wenn du als Rot beginnst, spiele deinen allerersten Stein IMMER in Spalte 4!
+
+                <!-- Spalte 2 -->
+                <div class="chart-bar-col">
+                  <span class="bar-tag tag-risky">⚠️ Schwach</span>
+                  <div class="bar-track">
+                    <div class="bar-fill bar-risky" style="height: 44%;">7</div>
+                  </div>
+                  <span class="bar-col-num">Sp. 2</span>
+                  <span class="bar-lines">7 Linien</span>
+                </div>
+
+                <!-- Spalte 3 -->
+                <div class="chart-bar-col">
+                  <span class="bar-tag tag-strong">🌟 Remis</span>
+                  <div class="bar-track">
+                    <div class="bar-fill bar-strong" style="height: 81%;">13</div>
+                  </div>
+                  <span class="bar-col-num">Sp. 3</span>
+                  <span class="bar-lines">13 Linien</span>
+                </div>
+
+                <!-- Spalte 4 (Zentrum) -->
+                <div class="chart-bar-col">
+                  <span class="bar-tag tag-best">👑 SIEG (100%)</span>
+                  <div class="bar-track">
+                    <div class="bar-fill bar-best" style="height: 100%;">16 ★</div>
+                  </div>
+                  <span class="bar-col-num" style="color: #34d399; font-weight: 800;">Sp. 4</span>
+                  <span class="bar-lines" style="color: #34d399; font-weight: 700;">16 Linien</span>
+                </div>
+
+                <!-- Spalte 5 -->
+                <div class="chart-bar-col">
+                  <span class="bar-tag tag-strong">🌟 Remis</span>
+                  <div class="bar-track">
+                    <div class="bar-fill bar-strong" style="height: 81%;">13</div>
+                  </div>
+                  <span class="bar-col-num">Sp. 5</span>
+                  <span class="bar-lines">13 Linien</span>
+                </div>
+
+                <!-- Spalte 6 -->
+                <div class="chart-bar-col">
+                  <span class="bar-tag tag-risky">⚠️ Schwach</span>
+                  <div class="bar-track">
+                    <div class="bar-fill bar-risky" style="height: 44%;">7</div>
+                  </div>
+                  <span class="bar-col-num">Sp. 6</span>
+                  <span class="bar-lines">7 Linien</span>
+                </div>
+
+                <!-- Spalte 7 -->
+                <div class="chart-bar-col">
+                  <span class="bar-tag tag-fatal">❌ Verlust</span>
+                  <div class="bar-track">
+                    <div class="bar-fill bar-fatal" style="height: 19%;">3</div>
+                  </div>
+                  <span class="bar-col-num">Sp. 7</span>
+                  <span class="bar-lines">3 Linien</span>
+                </div>
               </div>
             </div>
 
-            <!-- 2. Keine Vorlagen liefern -->
-            <div class="strategy-card">
-              <div class="strategy-card-header">
-                <span class="strategy-num">2</span>
-                <div class="strategy-meta">
-                  <span class="strategy-tag defense">Verteidigung</span>
-                  <h3>Die goldene Regel: Keine Vorlagen!</h3>
-                </div>
-                <span class="strategy-icon">⚠️</span>
-              </div>
-              <p>
-                Der häufigste Anfängerfehler ist die unbedachte <strong>Vorlage (Blunder)</strong>. Du wirfst ein, und dein Stein 
-                dient dem Gegner als Treppe, um sofort auf das Feld darüber zu setzen und 4-in-einer-Reihe zu gewinnen!
-              </p>
-              <div class="strategy-illustration blunder-illustration">
-                <div class="blunder-step step-bad">
-                  <span>Dein Zug: Stein fällt</span>
-                  <div class="mini-disc disc-red"></div>
-                </div>
-                <div class="arrow-right">➔</div>
-                <div class="blunder-step step-fatal">
-                  <span>Gegner setzt darüber: GEWINN!</span>
-                  <div class="mini-disc disc-yellow warning-glow"></div>
-                </div>
-              </div>
-              <div class="pro-tip">
-                <strong>💡 Profi-Tipp:</strong> Frage dich vor JEDEM Zug: <em>"Was passiert, wenn der Gegner genau auf meinen Stein draufsetzt?"</em>
-              </div>
-            </div>
+            <h3 style="font-size: 1.05rem; margin: 20px 0 10px 0; color: #f3f4f6;">Die 4 wichtigsten Eröffnungsvarianten (Züge 1 bis 4):</h3>
 
-            <!-- 3. Doppelbedrohungen / Gabeln -->
-            <div class="strategy-card">
-              <div class="strategy-card-header">
-                <span class="strategy-num">3</span>
-                <div class="strategy-meta">
-                  <span class="strategy-tag tactic">Taktik</span>
-                  <h3>Die Gabel (Doppelbedrohung / Fork)</h3>
+            <div class="openings-grid">
+              
+              <!-- Variante 1: Zentrumsturm-Duell -->
+              <div class="opening-variant-card">
+                <div class="variant-card-header">
+                  <div class="variant-title-box">
+                    <span class="strategy-tag opening">Meister-Klassiker</span>
+                    <h4>1. Das Duell im Zentrum ("Turm-Konter")</h4>
+                    <span class="variant-move-seq">Zugfolge: ① Sp.4 ➔ ② Sp.4 ➔ ③ Sp.3 ➔ ④ Sp.5</span>
+                  </div>
+                  <span class="strategy-icon">🏰</span>
                 </div>
-                <span class="strategy-icon">⚡</span>
-              </div>
-              <p>
-                Erzeuge mit einem einzigen Stein ZWEI getrennte Gewinnfelder gleichzeitig. Da der Gegner pro Runde nur 
-                einen einzigen Stein einwerfen kann, kann er nur eine Bedrohung abwehren – die andere gewinnt das Spiel!
-              </p>
-              <div class="pro-tip">
-                <strong>💡 Profi-Tipp:</strong> Kombiniere diagonale und horizontale Linien, die sich in einem gemeinsamen Stein kreuzen.
-              </div>
-            </div>
 
-            <!-- 4. Offene Dreierketten & Präventiv-Block -->
-            <div class="strategy-card">
-              <div class="strategy-card-header">
-                <span class="strategy-num">4</span>
-                <div class="strategy-meta">
-                  <span class="strategy-tag attack">Angriff & Abwehr</span>
-                  <h3>Offene Dreierketten & Präventiv-Block</h3>
-                </div>
-                <span class="strategy-icon">🌟</span>
-              </div>
-              <p>
-                Drei Steine mit ZWEI offenen Enden (z. B. <code>_ O O O _</code>) sind unaufhaltbar: 
-                Egal welches Ende du blockst, der Gegner gewinnt am anderen! Du stehst vor zwei Totenköpfen.
-              </p>
-              <div class="pro-tip">
-                <strong>💡 Profi-Tipp (Präventiv-Block):</strong> Warte niemals, bis der 3. Stein liegt! 
-                Blockiere eine offene Kette bereits, wenn der Gegner <strong>zwei Steine</strong> hat (Präventiv-Block mit 88% Bewertung), 
-                um die tödliche Doppelbedrohung im Keim zu ersticken!
-              </div>
-            </div>
+                <div class="variant-card-body">
+                  <div class="mini-board-wrapper">
+                    <!-- Mini Board 7x6 -->
+                    <div class="mini-board-grid">
+                      <!-- Row 0 (oben) -->
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <!-- Row 1 -->
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <!-- Row 2 -->
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <!-- Row 3 -->
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <!-- Row 4 -->
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"><div class="mini-disc disc-p2" title="Zug 2: Gelb auf Rot">2</div></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <!-- Row 5 (Boden) -->
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"><div class="mini-disc disc-p1" title="Zug 3: Rot Flügel">3</div></div><div class="mini-cell"><div class="mini-disc disc-p1" title="Zug 1: Rot Mitte">1</div></div><div class="mini-cell"><div class="mini-disc disc-p2" title="Zug 4: Gelb Konter">4</div></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                    </div>
+                    <span class="mini-board-caption">Spalte 1 bis 7 (Boden)</span>
+                  </div>
 
-            <!-- 5. Paritäts-Regel -->
-            <div class="strategy-card">
-              <div class="strategy-card-header">
-                <span class="strategy-num">5</span>
-                <div class="strategy-meta">
-                  <span class="strategy-tag mastery">Meisterklasse</span>
-                  <h3>Die Paritäts-Regel (Gerade vs. Ungerade)</h3>
-                </div>
-                <span class="strategy-icon">📏</span>
-              </div>
-              <p>
-                Jede Spalte hat 6 Zeilen. Spieler 1 (Rot) profitiert von <strong>ungeraden Zeilen (1, 3, 5)</strong>, 
-                weil Rot immer den ersten Stein in einer neuen Zeile legt. Spieler 2 (Gelb) profitiert von <strong>geraden Zeilen (2, 4, 6)</strong>.
-              </p>
-              <div class="pro-tip">
-                <strong>💡 Profi-Tipp:</strong> Baue als Rot deine Drohungen gezielt auf ungeraden Zeilen auf; als Gelb auf geraden!
-              </div>
-            </div>
+                  <div class="why-box">
+                    <div class="why-item why-good">
+                      <div class="why-header">
+                        <span class="why-badge">Zug 1 (Rot): Spalte 4</span>
+                        <strong>Dominante Mitte</strong>
+                      </div>
+                      <div class="why-desc">Besetzt sofort das Herzstück mit 16 Gewinnachsen.</div>
+                    </div>
 
-            <!-- 6. Vertikale Fallen & Zugzwang -->
-            <div class="strategy-card">
-              <div class="strategy-card-header">
-                <span class="strategy-num">6</span>
-                <div class="strategy-meta">
-                  <span class="strategy-tag endgame">Endspiel</span>
-                  <h3>Vertikale Fallen & Zugzwang</h3>
+                    <div class="why-item why-yellow">
+                      <div class="why-header">
+                        <span class="why-badge">Zug 2 (Gelb): Spalte 4</span>
+                        <strong>💡 Warum setzt Gelb direkt drauf?</strong>
+                      </div>
+                      <div class="why-desc">Gelb stoppt sofort Rots vertikalen Durchmarsch und sichert sich die gerade Zeile 2 (Paritätsvorteil für Gelb!).</div>
+                    </div>
+
+                    <div class="why-item why-good">
+                      <div class="why-header">
+                        <span class="why-badge">Zug 3 (Rot): Spalte 3</span>
+                        <strong>💡 Warum weicht Rot zur Seite aus?</strong>
+                      </div>
+                      <div class="why-desc">Rot baut einen horizontalen Flügel auf, um Gelb in eine Zwickmühle zwischen beiden Flanken zu treiben.</div>
+                    </div>
+                  </div>
                 </div>
-                <span class="strategy-icon">🧱</span>
               </div>
-              <p>
-                Brauchst du ein Feld in der Luft, das noch keine Basis hat? Rühre diese Spalte nicht an! 
-                Spiele neutral in anderen Spalten weiter, bis der Gegner keine Ausweichmöglichkeiten mehr hat und die Stufe für dich bauen MUSS.
-              </p>
-              <div class="pro-tip">
-                <strong>💡 Profi-Tipp:</strong> Geduld ist eine Tugend. Zwinge den Gegner durch Zugzwang in den Fehler!
+
+              <!-- Variante 2: Das Zentrums-Flügel-Dreieck -->
+              <div class="opening-variant-card">
+                <div class="variant-card-header">
+                  <div class="variant-title-box">
+                    <span class="strategy-tag attack">Aggressiver Angriff</span>
+                    <h4>2. Das Zentrums-Flügel-Dreieck</h4>
+                    <span class="variant-move-seq">Zugfolge: ① Sp.4 ➔ ② Sp.3 ➔ ③ Sp.5 ➔ ④ Sp.4</span>
+                  </div>
+                  <span class="strategy-icon">🔺</span>
+                </div>
+
+                <div class="variant-card-body">
+                  <div class="mini-board-wrapper">
+                    <!-- Mini Board 7x6 -->
+                    <div class="mini-board-grid">
+                      <!-- Row 0 -->
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <!-- Row 1 -->
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <!-- Row 2 -->
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <!-- Row 3 -->
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <!-- Row 4 -->
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"><div class="mini-disc disc-p2" title="Zug 4: Gelb deckt Mitte">4</div></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <!-- Row 5 (Boden) -->
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"><div class="mini-disc disc-p2" title="Zug 2: Gelb Nebenmitte">2</div></div><div class="mini-cell"><div class="mini-disc disc-p1" title="Zug 1: Rot Mitte">1</div></div><div class="mini-cell"><div class="mini-disc disc-p1" title="Zug 3: Rot Gegenflügel">3</div></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                    </div>
+                    <span class="mini-board-caption">Spalte 1 bis 7 (Boden)</span>
+                  </div>
+
+                  <div class="why-box">
+                    <div class="why-item why-yellow">
+                      <div class="why-header">
+                        <span class="why-badge">Zug 2 (Gelb): Spalte 3</span>
+                        <strong>💡 Warum setzt Gelb daneben?</strong>
+                      </div>
+                      <div class="why-desc">Gelb fordert das Boden-Fundament heraus und will eigene Reihen nach links anlegen.</div>
+                    </div>
+
+                    <div class="why-item why-good">
+                      <div class="why-header">
+                        <span class="why-badge">Zug 3 (Rot): Spalte 5</span>
+                        <strong>💡 Warum die Dreiecks-Basis?</strong>
+                      </div>
+                      <div class="why-desc">Rot besitzt nun die Spalten 3, 4, 5 (Dreieck). Von hier drohen zu beiden Seiten simultane Dreierketten!</div>
+                    </div>
+
+                    <div class="why-item why-bad">
+                      <div class="why-header">
+                        <span class="why-badge">Zug 4 (Gelb): Spalte 4</span>
+                        <strong>⚠️ Pflicht-Verteidigung für Gelb!</strong>
+                      </div>
+                      <div class="why-desc">Gelb MUSS jetzt zwingend Spalte 4 besetzen, sonst baut Rot mit Stein 4 eine tödliche Doppeldiagonale.</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Variante 3: Der asymmetrische Konter -->
+              <div class="opening-variant-card">
+                <div class="variant-card-header">
+                  <div class="variant-title-box">
+                    <span class="strategy-tag tactic">Tempovorteil</span>
+                    <h4>3. Der asymmetrische Konter</h4>
+                    <span class="variant-move-seq">Zugfolge: ① Sp.4 ➔ ② Sp.2 ➔ ③ Sp.4 ➔ ④ Sp.3</span>
+                  </div>
+                  <span class="strategy-icon">⚡</span>
+                </div>
+
+                <div class="variant-card-body">
+                  <div class="mini-board-wrapper">
+                    <!-- Mini Board 7x6 -->
+                    <div class="mini-board-grid">
+                      <!-- Row 0-3 -->
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <!-- Row 4 -->
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"><div class="mini-disc disc-p1" title="Zug 3: Rot stapelt">3</div></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <!-- Row 5 (Boden) -->
+                      <div class="mini-cell"></div><div class="mini-cell"><div class="mini-disc disc-p2" title="Zug 2: Gelb Flanke">2</div></div><div class="mini-cell"><div class="mini-disc disc-p2" title="Zug 4: Gelb Mitte">4</div></div><div class="mini-cell"><div class="mini-disc disc-p1" title="Zug 1: Rot Mitte">1</div></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                    </div>
+                    <span class="mini-board-caption">Spalte 1 bis 7 (Boden)</span>
+                  </div>
+
+                  <div class="why-box">
+                    <div class="why-item why-bad">
+                      <div class="why-header">
+                        <span class="why-badge">Zug 2 (Gelb): Spalte 2</span>
+                        <strong>⚠️ Zu passiver Flankenzug</strong>
+                      </div>
+                      <div class="why-desc">Spalte 2 übt keinen Druck auf die Mitte aus. Gelb schenkt Rot kampflos das Eröffnungstempo.</div>
+                    </div>
+
+                    <div class="why-item why-good">
+                      <div class="why-header">
+                        <span class="why-badge">Zug 3 (Rot): Spalte 4</span>
+                        <strong>💡 Warum stapelt Rot in die Höhe?</strong>
+                      </div>
+                      <div class="why-desc">Weil Gelb die Mitte nicht besetzt hat, sichert sich Rot die ungerade 3. Zeile im Zentrum. Das gibt maximale Diagonal-Kontrolle!</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Variante 4: Der fatale Rand-Eröffnungszug -->
+              <div class="opening-variant-card">
+                <div class="variant-card-header">
+                  <div class="variant-title-box">
+                    <span class="strategy-tag defense">Tempo-Diebstahl</span>
+                    <h4>4. Der fatale Rand-Eröffnungszug</h4>
+                    <span class="variant-move-seq">Zugfolge: ① Sp.1 (Grober Fehler) ➔ ② Sp.4 (Siegübernahme)</span>
+                  </div>
+                  <span class="strategy-icon">❌</span>
+                </div>
+
+                <div class="variant-card-body">
+                  <div class="mini-board-wrapper">
+                    <!-- Mini Board 7x6 -->
+                    <div class="mini-board-grid">
+                      <!-- Row 0-4 -->
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <!-- Row 5 (Boden) -->
+                      <div class="mini-cell"><div class="mini-disc disc-p1" style="box-shadow: 0 0 8px #ef4444;" title="Zug 1: Rot am Rand">1</div></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell star-spot"><div class="mini-disc disc-p2" style="box-shadow: 0 0 10px #10b981;" title="Zug 2: Gelb stiehlt Zentrum">2</div></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                    </div>
+                    <span class="mini-board-caption">Spalte 1 bis 7 (Boden)</span>
+                  </div>
+
+                  <div class="why-box">
+                    <div class="why-item why-bad">
+                      <div class="why-header">
+                        <span class="why-badge">Zug 1 (Rot): Spalte 1</span>
+                        <strong>❌ Katastrophaler Start</strong>
+                      </div>
+                      <div class="why-desc">Spalte 1 besitzt nur 3 Gewinnlinien. Rot verschenkt seinen Startvorteil komplett.</div>
+                    </div>
+
+                    <div class="why-item why-good">
+                      <div class="why-header">
+                        <span class="why-badge">Zug 2 (Gelb): Spalte 4</span>
+                        <strong>👑 Warum stiehlt Gelb das Spiel?</strong>
+                      </div>
+                      <div class="why-desc">Gelb übernimmt sofort mit Zug 2 das Zentrum. Dadurch dreht sich die Partie um: Gelb agiert faktisch als der Spieler mit dem Startvorteil!</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- ========================================================
+               TAB 2: HÄUFIGSTE GRAVIERENDE FEHLER (BLUNDER-ATLAS)
+               ======================================================== -->
+          <div class="tab-pane" id="tab-blunders">
+            <p class="academy-intro">
+              Partien werden im Vier Gewinnt selten durch pure Genialität entschieden, sondern fast immer durch 
+              <strong>vermeidbare taktische Blindheiten (Blunder)</strong>. Wenn du diese 5 typischen Fehler kennst und abstellst, 
+              wirst du deine Gewinnquote sofort dramatisch in die Höhe schrauben!
+            </p>
+
+            <div class="blunders-grid">
+              
+              <!-- Fehler 1: Tödliche Vorlage -->
+              <div class="blunder-card">
+                <div class="blunder-card-header">
+                  <div class="blunder-title-box">
+                    <span class="blunder-tag">⚠️ Fehler #1: Der Blunder</span>
+                    <h4>Die tödliche Vorlage (Treppenstufe)</h4>
+                  </div>
+                  <span class="strategy-icon">💀</span>
+                </div>
+
+                <div class="blunder-card-body">
+                  <div class="mini-board-wrapper">
+                    <!-- Mini Board -->
+                    <div class="mini-board-grid">
+                      <!-- Row 0-2 -->
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <!-- Row 3 -->
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell danger-spot" title="Gegner gewinnt hier sofort!">💀</div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <!-- Row 4 -->
+                      <div class="mini-cell"></div><div class="mini-cell"><div class="mini-disc disc-p2"></div></div><div class="mini-cell"><div class="mini-disc disc-p2"></div></div><div class="mini-cell"><div class="mini-disc disc-p1" style="box-shadow: 0 0 8px #ef4444;" title="Dein fataler Einwurf">✕</div></div><div class="mini-cell"><div class="mini-disc disc-p2"></div></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <!-- Row 5 (Boden) -->
+                      <div class="mini-cell"></div><div class="mini-cell"><div class="mini-disc disc-p1"></div></div><div class="mini-cell"><div class="mini-disc disc-p1"></div></div><div class="mini-cell"><div class="mini-disc disc-p1"></div></div><div class="mini-cell"><div class="mini-disc disc-p1"></div></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                    </div>
+                    <span class="mini-board-caption">Spalte 4: Stein geworfen ➔ Gegner gewinnt darüber</span>
+                  </div>
+
+                  <div class="why-box">
+                    <p style="font-size: 0.8rem; color: var(--text-muted);">
+                      <strong>Was ist passiert?</strong> Du hast unbedacht in Spalte 4 geworfen. Dein Stein dient dem Gegner als perfekte 
+                      Auflage, um auf Zeile 3 direkt darüber zu setzen und seine 4er-Reihe zu vollenden!
+                    </p>
+                    <div class="blunder-cure">
+                      <strong>🛡️ Die Rettungsregel (Draufsetz-Check):</strong> Prüfe vor JEDEM Klick das Feld unmittelbar über deinem Ziel: 
+                      <em>"Kann der Gegner genau auf meinen Stein draufsetzen und gewinnen?"</em> Wenn ja: Finger weg!
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Fehler 2: Verschlafene offene 3er-Kette -->
+              <div class="blunder-card">
+                <div class="blunder-card-header">
+                  <div class="blunder-title-box">
+                    <span class="blunder-tag">⚠️ Fehler #2: Horizontale Blindheit</span>
+                    <h4>Die verschlafene offene Dreierkette</h4>
+                  </div>
+                  <span class="strategy-icon">👀</span>
+                </div>
+
+                <div class="blunder-card-body">
+                  <div class="mini-board-wrapper">
+                    <!-- Mini Board -->
+                    <div class="mini-board-grid">
+                      <!-- Row 0-4 -->
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <!-- Row 5 (Boden) -->
+                      <div class="mini-cell"></div><div class="mini-cell danger-spot" title="Gewinnfeld 1">💀</div><div class="mini-cell"><div class="mini-disc disc-p2"></div></div><div class="mini-cell"><div class="mini-disc disc-p2"></div></div><div class="mini-cell"><div class="mini-disc disc-p2"></div></div><div class="mini-cell danger-spot" title="Gewinnfeld 2">💀</div><div class="mini-cell"></div>
+                    </div>
+                    <span class="mini-board-caption">2 offene Enden (💀) = Unausweichliche Niederlage</span>
+                  </div>
+
+                  <div class="why-box">
+                    <p style="font-size: 0.8rem; color: var(--text-muted);">
+                      <strong>Was ist passiert?</strong> Du hast gewartet, bis der Gegner 3 Steine hatte. Jetzt sind BEIDE Enden offen. 
+                      Egal welches Ende du abwehrst, der Gegner gewinnt am anderen!
+                    </p>
+                    <div class="blunder-cure">
+                      <strong>🛡️ Die Rettungsregel (Präventiv-Block):</strong> Blockiere offene Reihen immer schon bei <strong>zwei Steinen</strong>! 
+                      Lasse niemals zu, dass ein Gegner 3 freie Steine in Folge ungestört legen kann.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Fehler 3: Aufgeben des Zentrums -->
+              <div class="blunder-card">
+                <div class="blunder-card-header">
+                  <div class="blunder-title-box">
+                    <span class="blunder-tag">⚠️ Fehler #3: Rand-Flucht</span>
+                    <h4>Das Aufgeben des Zentrums</h4>
+                  </div>
+                  <span class="strategy-icon">🚪</span>
+                </div>
+
+                <div class="blunder-card-body">
+                  <div class="mini-board-wrapper">
+                    <!-- Mini Board -->
+                    <div class="mini-board-grid">
+                      <!-- Row 0-2 -->
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <!-- Row 3 -->
+                      <div class="mini-cell"><div class="mini-disc disc-p1"></div></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"><div class="mini-disc disc-p2"></div></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <!-- Row 4 -->
+                      <div class="mini-cell"><div class="mini-disc disc-p1"></div></div><div class="mini-cell"><div class="mini-disc disc-p1"></div></div><div class="mini-cell"></div><div class="mini-cell"><div class="mini-disc disc-p2"></div></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <!-- Row 5 (Boden) -->
+                      <div class="mini-cell"><div class="mini-disc disc-p1"></div></div><div class="mini-cell"><div class="mini-disc disc-p1"></div></div><div class="mini-cell"></div><div class="mini-cell"><div class="mini-disc disc-p2"></div></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                    </div>
+                    <span class="mini-board-caption">Rot stapelt am Rand – Gelb beherrscht das gesamte Brett</span>
+                  </div>
+
+                  <div class="why-box">
+                    <p style="font-size: 0.8rem; color: var(--text-muted);">
+                      <strong>Was ist passiert?</strong> Aus Scheu vor dem Kampf in der Mitte wurden Steine am Rand (Spalte 1 & 2) gehortet. 
+                      Dort gibt es nur 3 bzw. 7 Gewinnlinien, während der Gegner mit Spalte 4 alle 16 Achsen kontrolliert.
+                    </p>
+                    <div class="blunder-cure">
+                      <strong>🛡️ Die Rettungsregel (Die 3-aus-5-Regel):</strong> Mindestens drei deiner ersten fünf Steine MÜSSEN in die Spalten 3, 4 oder 5 geworfen werden.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Fehler 4: Die unsichtbare Diagonale -->
+              <div class="blunder-card">
+                <div class="blunder-card-header">
+                  <div class="blunder-title-box">
+                    <span class="blunder-tag">⚠️ Fehler #4: Diagonaler Tunnelblick</span>
+                    <h4>Die unsichtbare Diagonale</h4>
+                  </div>
+                  <span class="strategy-icon">📐</span>
+                </div>
+
+                <div class="blunder-card-body">
+                  <div class="mini-board-wrapper">
+                    <!-- Mini Board -->
+                    <div class="mini-board-grid">
+                      <!-- Row 0-1 -->
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <!-- Row 2 -->
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell danger-spot" title="Schräger Einschlagspunkt">💀</div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <!-- Row 3 -->
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"><div class="mini-disc disc-p2" style="box-shadow: 0 0 8px #f59e0b;">●</div></div><div class="mini-cell"><div class="mini-disc disc-p1"></div></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <!-- Row 4 -->
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"><div class="mini-disc disc-p2" style="box-shadow: 0 0 8px #f59e0b;">●</div></div><div class="mini-cell"><div class="mini-disc disc-p1"></div></div><div class="mini-cell"><div class="mini-disc disc-p1"></div></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <!-- Row 5 (Boden) -->
+                      <div class="mini-cell"></div><div class="mini-cell"><div class="mini-disc disc-p2" style="box-shadow: 0 0 8px #f59e0b;">●</div></div><div class="mini-cell"><div class="mini-disc disc-p1"></div></div><div class="mini-cell"><div class="mini-disc disc-p1"></div></div><div class="mini-cell"><div class="mini-disc disc-p2"></div></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                    </div>
+                    <span class="mini-board-caption">45°-Diagonale wird von Hilfssteinen nach oben getragen</span>
+                  </div>
+
+                  <div class="why-box">
+                    <p style="font-size: 0.8rem; color: var(--text-muted);">
+                      <strong>Was ist passiert?</strong> Über 60% aller Niederlagen entstehen durch übersehene Diagonalen, weil das menschliche Auge fast ausschließlich waagerecht und senkrecht scannt.
+                    </p>
+                    <div class="blunder-cure">
+                      <strong>🛡️ Die Rettungsregel (Der 45°-Scan):</strong> Peile nach jedem Zug diagonal über das Spielfeld: Welche schrägen 3er-Ketten schweben bereits in der Luft?
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Fehler 5: Die Gabel-Einladung -->
+              <div class="blunder-card">
+                <div class="blunder-card-header">
+                  <div class="blunder-title-box">
+                    <span class="blunder-tag">⚠️ Fehler #5: Taktische Falle</span>
+                    <h4>Die Gabel-Einladung (Doppelbedrohung)</h4>
+                  </div>
+                  <span class="strategy-icon">⚡</span>
+                </div>
+
+                <div class="blunder-card-body">
+                  <div class="mini-board-wrapper">
+                    <!-- Mini Board -->
+                    <div class="mini-board-grid">
+                      <!-- Row 0-2 -->
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <!-- Row 3 -->
+                      <div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell danger-spot" title="Schnittpunkt (Gabel)">⚡</div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <!-- Row 4 -->
+                      <div class="mini-cell"></div><div class="mini-cell"><div class="mini-disc disc-p2"></div></div><div class="mini-cell"><div class="mini-disc disc-p2"></div></div><div class="mini-cell"><div class="mini-disc disc-p1"></div></div><div class="mini-cell"><div class="mini-disc disc-p1"></div></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                      <!-- Row 5 (Boden) -->
+                      <div class="mini-cell"></div><div class="mini-cell"><div class="mini-disc disc-p1"></div></div><div class="mini-cell"><div class="mini-disc disc-p2"></div></div><div class="mini-cell"><div class="mini-disc disc-p1"></div></div><div class="mini-cell"><div class="mini-disc disc-p2"></div></div><div class="mini-cell"></div><div class="mini-cell"></div>
+                    </div>
+                    <span class="mini-board-caption">Schnittpunkt kreuzt zwei Gewinnlinien gleichzeitig</span>
+                  </div>
+
+                  <div class="why-box">
+                    <p style="font-size: 0.8rem; color: var(--text-muted);">
+                      <strong>Was ist passiert?</strong> Du blockst eine einfache Reihe, übersiehst dabei aber, dass der Gegner mit seinem nächsten Stein ZWEI Linien gleichzeitig scharf schaltet (Gabel).
+                    </p>
+                    <div class="blunder-cure">
+                      <strong>🛡️ Die Rettungsregel (Schnittpunkte besetzen):</strong> Suche nach Feldern, an denen sich zwei gegnerische Linien schneiden, und nimm dieses Feld selbst ein, bevor der Gegner es tut!
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- ========================================================
+               TAB 3: DIE 6 GOLDENEN GRUNDSTRATEGIEN
+               ======================================================== -->
+          <div class="tab-pane" id="tab-strategies">
+            <p class="academy-intro">
+              Mit diesen 6 goldenen Prinzipien unseres KI-Tutors beherrschst du das Spiel von der Eröffnung bis zum Endspiel:
+            </p>
+
+            <div class="strategies-grid">
+              <!-- 1. Zentrumskontrolle -->
+              <div class="strategy-card">
+                <div class="strategy-card-header">
+                  <span class="strategy-num">1</span>
+                  <div class="strategy-meta">
+                    <span class="strategy-tag opening">Eröffnung</span>
+                    <h3>Die Macht der Mitte (Zentrumskontrolle)</h3>
+                  </div>
+                  <span class="strategy-icon">🎯</span>
+                </div>
+                <p>
+                  Von den 69 möglichen Viererketten laufen <strong>16 Linien direkt durch die mittlere Spalte 4</strong>. 
+                  Am Außenrand (Spalte 1 und 7) sind es nur jeweils 3 Linien! Wer die Mitte besitzt, kontrolliert das Spiel.
+                </p>
+                <div class="strategy-mini-board center-preview">
+                  <div class="mini-col">3</div>
+                  <div class="mini-col">7</div>
+                  <div class="mini-col">13</div>
+                  <div class="mini-col active-center">16 ★</div>
+                  <div class="mini-col">13</div>
+                  <div class="mini-col">7</div>
+                  <div class="mini-col">3</div>
+                </div>
+                <div class="pro-tip">
+                  <strong>💡 Profi-Tipp:</strong> Wenn du als Rot beginnst, spiele deinen allerersten Stein IMMER in Spalte 4!
+                </div>
+              </div>
+
+              <!-- 2. Keine Vorlagen liefern -->
+              <div class="strategy-card">
+                <div class="strategy-card-header">
+                  <span class="strategy-num">2</span>
+                  <div class="strategy-meta">
+                    <span class="strategy-tag defense">Verteidigung</span>
+                    <h3>Die goldene Regel: Keine Vorlagen!</h3>
+                  </div>
+                  <span class="strategy-icon">⚠️</span>
+                </div>
+                <p>
+                  Der häufigste Anfängerfehler ist die unbedachte <strong>Vorlage (Blunder)</strong>. Du wirfst ein, und dein Stein 
+                  dient dem Gegner als Treppe, um sofort auf das Feld darüber zu setzen und 4-in-einer-Reihe zu gewinnen!
+                </p>
+                <div class="strategy-illustration blunder-illustration">
+                  <div class="blunder-step step-bad">
+                    <span>Dein Zug: Stein fällt</span>
+                    <div class="mini-disc disc-red"></div>
+                  </div>
+                  <div class="arrow-right">➔</div>
+                  <div class="blunder-step step-fatal">
+                    <span>Gegner setzt darüber: GEWINN!</span>
+                    <div class="mini-disc disc-yellow warning-glow"></div>
+                  </div>
+                </div>
+                <div class="pro-tip">
+                  <strong>💡 Profi-Tipp:</strong> Frage dich vor JEDEM Zug: <em>"Was passiert, wenn der Gegner genau auf meinen Stein draufsetzt?"</em>
+                </div>
+              </div>
+
+              <!-- 3. Doppelbedrohungen / Gabeln -->
+              <div class="strategy-card">
+                <div class="strategy-card-header">
+                  <span class="strategy-num">3</span>
+                  <div class="strategy-meta">
+                    <span class="strategy-tag tactic">Taktik</span>
+                    <h3>Die Gabel (Doppelbedrohung / Fork)</h3>
+                  </div>
+                  <span class="strategy-icon">⚡</span>
+                </div>
+                <p>
+                  Erzeuge mit einem einzigen Stein ZWEI getrennte Gewinnfelder gleichzeitig. Da der Gegner pro Runde nur 
+                  einen einzigen Stein einwerfen kann, kann er nur eine Bedrohung abwehren – die andere gewinnt das Spiel!
+                </p>
+                <div class="pro-tip">
+                  <strong>💡 Profi-Tipp:</strong> Kombiniere diagonale und horizontale Linien, die sich in einem gemeinsamen Stein kreuzen.
+                </div>
+              </div>
+
+              <!-- 4. Offene Dreierketten & Präventiv-Block -->
+              <div class="strategy-card">
+                <div class="strategy-card-header">
+                  <span class="strategy-num">4</span>
+                  <div class="strategy-meta">
+                    <span class="strategy-tag attack">Angriff & Abwehr</span>
+                    <h3>Offene Dreierketten & Präventiv-Block</h3>
+                  </div>
+                  <span class="strategy-icon">🌟</span>
+                </div>
+                <p>
+                  Drei Steine mit ZWEI offenen Enden (z. B. <code>_ O O O _</code>) sind unaufhaltbar: 
+                  Egal welches Ende du blockst, der Gegner gewinnt am anderen! Du stehst vor zwei Totenköpfen.
+                </p>
+                <div class="pro-tip">
+                  <strong>💡 Profi-Tipp (Präventiv-Block):</strong> Warte niemals, bis der 3. Stein liegt! 
+                  Blockiere eine offene Kette bereits, wenn der Gegner <strong>zwei Steine</strong> hat (Präventiv-Block mit 88% Bewertung), 
+                  um die tödliche Doppelbedrohung im Keim zu ersticken!
+                </div>
+              </div>
+
+              <!-- 5. Paritäts-Regel -->
+              <div class="strategy-card">
+                <div class="strategy-card-header">
+                  <span class="strategy-num">5</span>
+                  <div class="strategy-meta">
+                    <span class="strategy-tag mastery">Meisterklasse</span>
+                    <h3>Die Paritäts-Regel (Gerade vs. Ungerade)</h3>
+                  </div>
+                  <span class="strategy-icon">📏</span>
+                </div>
+                <p>
+                  Jede Spalte hat 6 Zeilen. Spieler 1 (Rot) profitiert von <strong>ungeraden Zeilen (1, 3, 5)</strong>, 
+                  weil Rot immer den ersten Stein in einer neuen Zeile legt. Spieler 2 (Gelb) profitiert von <strong>geraden Zeilen (2, 4, 6)</strong>.
+                </p>
+                <div class="pro-tip">
+                  <strong>💡 Profi-Tipp:</strong> Baue als Rot deine Drohungen gezielt auf ungeraden Zeilen auf; als Gelb auf geraden!
+                </div>
+              </div>
+
+              <!-- 6. Vertikale Fallen & Zugzwang -->
+              <div class="strategy-card">
+                <div class="strategy-card-header">
+                  <span class="strategy-num">6</span>
+                  <div class="strategy-meta">
+                    <span class="strategy-tag endgame">Endspiel</span>
+                    <h3>Vertikale Fallen & Zugzwang</h3>
+                  </div>
+                  <span class="strategy-icon">🧱</span>
+                </div>
+                <p>
+                  Brauchst du ein Feld in der Luft, das noch keine Basis hat? Rühre diese Spalte nicht an! 
+                  Spiele neutral in anderen Spalten weiter, bis der Gegner keine Ausweichmöglichkeiten mehr hat und die Stufe für dich bauen MUSS.
+                </p>
+                <div class="pro-tip">
+                  <strong>💡 Profi-Tipp:</strong> Geduld ist eine Tugend. Zwinge den Gegner durch Zugzwang in den Fehler!
+                </div>
               </div>
             </div>
           </div>
+
         </div>
         <div class="modal-footer">
           <button class="btn btn-primary" id="btn-close-strategy-footer">Alles klar, zurück zum Spiel</button>

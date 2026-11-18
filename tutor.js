@@ -762,9 +762,9 @@ class ConnectFourTutor {
     if (totalDiscs < 4) {
       return {
         mood: 'learning',
-        icon: '🎯',
-        title: 'Eröffnungsphase: Zentrum!',
-        text: `In den ersten Zügen gilt die oberste Regel: Besetze die Mitte (Spalte 4)! Wer das Zentrum früh kontrolliert, dominiert das gesamte Spiel.`
+        icon: '🌟',
+        title: 'Eröffnungsphase: Die ersten Züge',
+        text: `In den ersten Zügen gilt: Spalte 4 (Zentrum) ist mathematisch die stärkste Eröffnung (16 Linien)! Klicke rechts auf "🌟 Eröffnungsvarianten", um die 4 Schlüssel-Muster in Grafiken zu studieren.`
       };
     }
 

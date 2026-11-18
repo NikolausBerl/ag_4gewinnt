@@ -137,6 +137,8 @@ class ConnectFourGame {
     this.isAiTurn = false;
     this.winningLine = null;
     this.history = [];      // Für Undo
+    this.redoStack = [];    // Für Redo (Spielverlauf vorwärts anschauen)
+    this.aiTimeoutId = null; // Timer-ID für anstehenden KI-Zug (abbrechbar bei Undo)
 
     // Lernmodus & KI-Tutor
     this.learnMode = false;
@@ -197,8 +199,8 @@ class ConnectFourGame {
     this.winnerTitleEl = document.getElementById('winner-title');
     this.winnerSubEl = document.getElementById('winner-sub');
     this.btnDismissBanner = document.getElementById('btn-dismiss-banner');
-    this.btnBannerUndoEl = document.getElementById('btn-banner-undo');
     this.btnUndoEl = document.getElementById('btn-undo');
+    this.btnRedoEl = document.getElementById('btn-redo');
     this.boardFrameEl = document.querySelector('.board-frame');
 
     this.btnSoundEl = document.getElementById('btn-sound');
@@ -224,6 +226,8 @@ class ConnectFourGame {
     this.tutorStrategyTip = document.getElementById('tutor-strategy-tip');
     this.strategyModal = document.getElementById('strategy-modal');
     this.btnOpenStrategies = document.getElementById('btn-open-strategies');
+    this.btnOpenOpenings = document.getElementById('btn-open-openings');
+    this.btnOpenBlunders = document.getElementById('btn-open-blunders');
     this.btnCloseStrategyModal = document.getElementById('btn-close-strategy-modal');
     this.btnCloseStrategyFooter = document.getElementById('btn-close-strategy-footer');
     this.btnActivateLearn = document.getElementById('btn-activate-learn');
@@ -232,8 +236,9 @@ class ConnectFourGame {
   bindEvents() {
     // Spalten-Drop Buttons
     this.colSelectorsEl.addEventListener('click', (e) => {
-      if (e.target.classList.contains('col-btn')) {
-        const col = parseInt(e.target.getAttribute('data-col'), 10);
+      const btn = e.target.closest('.col-btn');
+      if (btn) {
+        const col = parseInt(btn.getAttribute('data-col'), 10);
         this.handlePlayerAction('drop', col);
       }
     });
@@ -249,8 +254,9 @@ class ConnectFourGame {
 
     // Pop-Out Buttons
     this.popoutButtonsEl.addEventListener('click', (e) => {
-      if (e.target.classList.contains('pop-btn')) {
-        const col = parseInt(e.target.getAttribute('data-col'), 10);
+      const btn = e.target.closest('.pop-btn');
+      if (btn) {
+        const col = parseInt(btn.getAttribute('data-col'), 10);
         this.handlePlayerAction('pop', col);
       }
     });
@@ -314,14 +320,11 @@ class ConnectFourGame {
       });
     }
 
-    const btnBannerUndo = document.getElementById('btn-banner-undo');
-    if (btnBannerUndo) {
-      btnBannerUndo.addEventListener('click', () => {
-        this.undoLastMove();
-      });
-    }
-
     document.getElementById('btn-undo').addEventListener('click', () => this.undoLastMove());
+    const btnRedo = document.getElementById('btn-redo');
+    if (btnRedo) {
+      btnRedo.addEventListener('click', () => this.redoNextMove());
+    }
 
     // Sound Button
     this.btnSoundEl.addEventListener('click', () => {
@@ -348,26 +351,55 @@ class ConnectFourGame {
       this.btnActivateLearn.addEventListener('click', () => this.toggleLearnMode(true));
     }
 
-    // Tastenkürzel ('L' für Lernmodus, 'Ctrl+Z' oder 'U' für Zug zurück)
+    // Tastenkürzel:
+    // 'L' für Lernmodus
+    // 'Ctrl+Z' oder 'U' für Zug zurück (Undo)
+    // 'Ctrl+Y', 'Ctrl+Shift+Z' oder 'V' für Zug vorwärts (Redo)
     window.addEventListener('keydown', (e) => {
       if ((e.key === 'l' || e.key === 'L') && !e.target.matches('input, textarea')) {
         this.toggleLearnMode();
       }
-      if ((e.key === 'z' || e.key === 'Z') && (e.ctrlKey || e.metaKey)) {
+      // Undo
+      if ((e.key === 'z' || e.key === 'Z') && (e.ctrlKey || e.metaKey) && !e.shiftKey) {
         e.preventDefault();
         this.undoLastMove();
       }
       if ((e.key === 'u' || e.key === 'U') && !e.target.matches('input, textarea') && !e.ctrlKey && !e.metaKey) {
         this.undoLastMove();
       }
+      // Redo
+      if ((e.key === 'y' || e.key === 'Y') && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        this.redoNextMove();
+      }
+      if ((e.key === 'z' || e.key === 'Z') && (e.ctrlKey || e.metaKey) && e.shiftKey) {
+        e.preventDefault();
+        this.redoNextMove();
+      }
+      if ((e.key === 'v' || e.key === 'V') && !e.target.matches('input, textarea') && !e.ctrlKey && !e.metaKey) {
+        this.redoNextMove();
+      }
     });
 
-    // Strategie Akademie Modal
+    // Strategie Akademie Modal & Tab Navigation
     if (this.btnOpenStrategies) {
-      this.btnOpenStrategies.addEventListener('click', () => {
-        this.strategyModal.style.display = 'flex';
-      });
+      this.btnOpenStrategies.addEventListener('click', () => this.openStrategyModal('strategies'));
     }
+    if (this.btnOpenOpenings) {
+      this.btnOpenOpenings.addEventListener('click', () => this.openStrategyModal('openings'));
+    }
+    if (this.btnOpenBlunders) {
+      this.btnOpenBlunders.addEventListener('click', () => this.openStrategyModal('blunders'));
+    }
+
+    // Tab-Buttons im Modal
+    document.querySelectorAll('.modal-tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tab = btn.getAttribute('data-tab');
+        this.switchStrategyTab(tab);
+      });
+    });
+
     if (this.btnCloseStrategyModal) {
       this.btnCloseStrategyModal.addEventListener('click', () => {
         this.strategyModal.style.display = 'none';
@@ -415,6 +447,10 @@ class ConnectFourGame {
   }
 
   restartGame() {
+    if (this.aiTimeoutId) {
+      clearTimeout(this.aiTimeoutId);
+      this.aiTimeoutId = null;
+    }
     this.board = this.createEmptyBoard();
     this.currentPlayer = 1;
     this.gameOver = false;
@@ -422,6 +458,7 @@ class ConnectFourGame {
     this.isAiTurn = false;
     this.winningLine = null;
     this.history = [];
+    this.redoStack = [];
     this.stats.currentMoves = 0;
 
     // Game Over Banner ausblenden & Drop-Spalten wieder einblenden
@@ -534,6 +571,7 @@ class ConnectFourGame {
 
     // Zustand für Undo speichern
     this.saveHistoryState();
+    this.redoStack = []; // Neuer Spielzug verwirft vorangegangene Redo-Zweige
 
     this.board[targetRow][col] = player;
     this.renderBoard();
@@ -553,6 +591,7 @@ class ConnectFourGame {
     if (this.board[this.ROWS - 1][col] !== player) return false;
 
     this.saveHistoryState();
+    this.redoStack = [];
 
     // Untersten Stein entfernen und alle oberen nachrutschen lassen
     for (let r = this.ROWS - 1; r > 0; r--) {
@@ -571,6 +610,13 @@ class ConnectFourGame {
   }
 
   triggerAiMove() {
+    if (this.gameOver) return;
+
+    if (this.aiTimeoutId) {
+      clearTimeout(this.aiTimeoutId);
+      this.aiTimeoutId = null;
+    }
+
     this.isAiTurn = true;
     this.aiThinkingEl.style.display = 'flex';
     this.turnTextEl.textContent = 'KI überlegt...';
@@ -580,7 +626,10 @@ class ConnectFourGame {
     // Kleines Timeout, damit der Mensch den Zug animiert sieht und das UI nicht blockiert
     const delay = this.difficulty === 1 ? 250 : (this.difficulty === 2 ? 350 : 450);
 
-    setTimeout(() => {
+    this.aiTimeoutId = setTimeout(() => {
+      this.aiTimeoutId = null;
+      if (this.gameOver || !this.isAiTurn) return;
+
       const best = this.ai.getBestMove(this.board, this.difficulty, this.popOutEnabled);
 
       // Statistiken im UI aktualisieren
@@ -665,6 +714,23 @@ class ConnectFourGame {
     }, 450);
   }
 
+  openStrategyModal(tabName = 'openings') {
+    if (!this.strategyModal) return;
+    this.strategyModal.style.display = 'flex';
+    this.switchStrategyTab(tabName);
+  }
+
+  switchStrategyTab(tabName) {
+    const tabBtns = document.querySelectorAll('.modal-tab-btn');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+    tabBtns.forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-tab') === tabName);
+    });
+    tabPanes.forEach(pane => {
+      pane.classList.toggle('active', pane.id === `tab-${tabName}`);
+    });
+  }
+
   saveHistoryState() {
     this.history.push({
       board: this.board.map(r => [...r]),
@@ -674,10 +740,31 @@ class ConnectFourGame {
   }
 
   undoLastMove() {
-    if (this.history.length === 0 || this.isAiTurn) return;
+    // Falls die KI gerade rechnet, brechen wir den anstehenden KI-Zug sofort ab
+    if (this.aiTimeoutId) {
+      clearTimeout(this.aiTimeoutId);
+      this.aiTimeoutId = null;
+    }
+    this.isAiTurn = false;
+    if (this.aiThinkingEl) {
+      this.aiThinkingEl.style.display = 'none';
+    }
+
+    // Wenn keine Spielzüge mehr in der Historie sind, kann nichts zurückgenommen werden
+    if (this.history.length === 0) return;
 
     const wasGameOver = this.gameOver;
     const prevWinner = this.winner;
+
+    // Aktuellen Zustand vor dem Zurücknehmen auf den Redo-Stack sichern
+    this.redoStack.push({
+      board: this.board.map(r => [...r]),
+      currentPlayer: this.currentPlayer,
+      moves: this.stats.currentMoves,
+      gameOver: wasGameOver,
+      winner: prevWinner,
+      winningLine: this.winningLine ? [...this.winningLine] : null
+    });
 
     // Falls das Spiel beendet war: Status zurücksetzen und Rundenzähler anpassen
     if (wasGameOver) {
@@ -705,33 +792,12 @@ class ConnectFourGame {
       }
     }
 
-    // Schritte ermitteln:
-    // Im PvC-Modus:
-    // - Wenn Spieler 1 (Mensch) gewonnen hat, wurde nur 1 Zug (sein Siegeszug) gemacht -> 1 Schritt zurück.
-    // - Wenn die KI gewonnen hat (oder unentschieden/mitten im Spiel): 2 Züge zurück (KI-Zug + menschlicher Zug),
-    //   damit der menschliche Spieler wieder am Zug ist und den Fehler korrigieren kann.
-    // Im PvP-Modus: immer genau 1 Zug zurück.
-    let stepsToUndo = 1;
-    if (this.gameMode === 'pvc') {
-      if (wasGameOver && prevWinner === 1) {
-        stepsToUndo = 1;
-      } else if (this.history.length >= 2) {
-        stepsToUndo = 2;
-      } else {
-        stepsToUndo = 1;
-      }
-    } else {
-      stepsToUndo = 1;
-    }
-
-    for (let i = 0; i < stepsToUndo; i++) {
-      if (this.history.length > 0) {
-        const lastState = this.history.pop();
-        this.board = lastState.board;
-        this.currentPlayer = lastState.currentPlayer;
-        this.stats.currentMoves = lastState.moves;
-      }
-    }
+    // WICHTIG: IMMER genau 1 Spielstein pro Klick zurücknehmen (Stein für Stein)
+    // Man kann dadurch das gesamte Spiel bis zum allerersten Zug zurückgehen!
+    const lastState = this.history.pop();
+    this.board = lastState.board;
+    this.currentPlayer = lastState.currentPlayer;
+    this.stats.currentMoves = lastState.moves;
 
     this.sound.playPop();
     this.renderBoard();
@@ -741,9 +807,78 @@ class ConnectFourGame {
 
     // Feedback im Tutor-Quickbar
     if (this.learnMode && this.tutorQuickMsg) {
+      const playerLabel = this.currentPlayer === 1 ? 'Rot' : (this.gameMode === 'pvc' ? 'Computer (Gelb)' : 'Gelb');
       this.tutorQuickMsg.innerHTML = wasGameOver 
-        ? '<strong>Zug zurückgenommen!</strong> Die Gewinnstellung wurde aufgehoben. Analysiere das Brett und versuche einen anderen Zug!' 
-        : '<strong>Zug zurückgenommen.</strong> Du bist wieder am Zug!';
+        ? `<strong>Gewinnstellung aufgehoben!</strong> 1 Stein zurückgenommen. (Verlauf: ${this.history.length} zurück / ${this.redoStack.length} vor)` 
+        : `<strong>1 Stein zurückgenommen.</strong> ${playerLabel} ist jetzt am Zug. (Verlauf: ${this.history.length} zurück / ${this.redoStack.length} vor)`;
+    }
+  }
+
+  redoNextMove() {
+    // Falls die KI rechnet, abbrechen
+    if (this.aiTimeoutId) {
+      clearTimeout(this.aiTimeoutId);
+      this.aiTimeoutId = null;
+    }
+    this.isAiTurn = false;
+    if (this.aiThinkingEl) {
+      this.aiThinkingEl.style.display = 'none';
+    }
+
+    if (this.redoStack.length === 0) return;
+
+    // Aktuellen Zustand vor dem Vorwärtsgehen auf History sichern
+    this.history.push({
+      board: this.board.map(r => [...r]),
+      currentPlayer: this.currentPlayer,
+      moves: this.stats.currentMoves
+    });
+
+    const nextState = this.redoStack.pop();
+    this.board = nextState.board;
+    this.currentPlayer = nextState.currentPlayer;
+    this.stats.currentMoves = nextState.moves;
+
+    // Falls dieser Zug die Partie beendet hatte, Zustand und Stats wiederherstellen
+    if (nextState.gameOver) {
+      this.gameOver = true;
+      this.winner = nextState.winner;
+      this.winningLine = nextState.winningLine;
+      this.stats.rounds++;
+      if (this.winner === 1) this.stats.p1Wins++;
+      else if (this.winner === 2) this.stats.p2Wins++;
+      else if (this.winner === 0) this.stats.draws++;
+
+      if (this.colSelectorsEl) this.colSelectorsEl.style.display = 'none';
+      if (this.boardFrameEl) this.boardFrameEl.classList.add('game-over-active');
+
+      const p2Label = this.gameMode === 'pvc' ? 'Die KI (Gelb)' : 'Gelb';
+      const title = this.winner === 1 ? 'Rot hat gewonnen!' : (this.winner === 2 ? `${p2Label} hat gewonnen!` : 'Unentschieden!');
+      const sub = this.winner === 1 ? 'Hervorragend gespielt! Analysiere das Spielfeld in Ruhe.' : 'Analysiere das Spielfeld in Ruhe.';
+      const winClass = this.winner === 1 ? 'win-p1' : (this.winner === 2 ? 'win-p2' : 'win-draw');
+      const icon = this.winner === 1 ? '🏆' : (this.winner === 2 ? '🤖' : '🤝');
+      this.showGameOverModal(icon, title, sub, winClass);
+    } else {
+      this.gameOver = false;
+      this.winner = null;
+      this.winningLine = null;
+      if (this.gameOverOverlayEl) this.gameOverOverlayEl.style.display = 'none';
+      if (this.colSelectorsEl) this.colSelectorsEl.style.display = 'grid';
+      if (this.boardFrameEl) this.boardFrameEl.classList.remove('game-over-active');
+    }
+
+    this.sound.playDrop(2);
+    this.renderBoard();
+    this.updateUI();
+    this.clearMovePreview();
+    this.updateTutorUI();
+
+    // Feedback im Tutor-Quickbar
+    if (this.learnMode && this.tutorQuickMsg) {
+      const playerLabel = this.currentPlayer === 1 ? 'Rot' : (this.gameMode === 'pvc' ? 'Computer (Gelb)' : 'Gelb');
+      this.tutorQuickMsg.innerHTML = nextState.gameOver
+        ? `<strong>Vorwärts zum Spielende!</strong> Siegesstellung wiederhergestellt. (Verlauf: ${this.history.length} zurück / ${this.redoStack.length} vor)`
+        : `<strong>1 Stein vorwärts.</strong> ${playerLabel} ist am Zug. (Verlauf: ${this.history.length} zurück / ${this.redoStack.length} vor)`;
     }
   }
 
@@ -774,7 +909,18 @@ class ConnectFourGame {
       } else {
         this.p1HudEl.classList.remove('active');
         this.p2HudEl.classList.add('active');
-        this.turnTextEl.textContent = this.gameMode === 'pvc' ? 'Computer ist am Zug' : 'Gelb ist am Zug';
+        if (this.gameMode === 'pvc') {
+          this.turnTextEl.innerHTML = `<span>Gelb (KI) ist am Zug</span> <button id="btn-manual-ai" class="btn-mini-ai" title="KI den Zug ausführen lassen">🤖 KI ziehen lassen</button>`;
+          const btnManualAi = document.getElementById('btn-manual-ai');
+          if (btnManualAi) {
+            btnManualAi.onclick = (e) => {
+              e.stopPropagation();
+              this.triggerAiMove();
+            };
+          }
+        } else {
+          this.turnTextEl.textContent = 'Gelb ist am Zug';
+        }
       }
     }
 
@@ -790,9 +936,22 @@ class ConnectFourGame {
     this.updateColButtons();
     this.updatePopOutButtons();
 
-    const canUndo = this.history.length > 0 && !this.isAiTurn;
-    if (this.btnUndoEl) this.btnUndoEl.disabled = !canUndo;
-    if (this.btnBannerUndoEl) this.btnBannerUndoEl.disabled = !canUndo;
+    // Undo / Redo Buttons aktualisieren
+    const canUndo = this.history.length > 0;
+    if (this.btnUndoEl) {
+      this.btnUndoEl.disabled = !canUndo;
+      this.btnUndoEl.title = canUndo 
+        ? `Einen Stein zurücknehmen (${this.history.length} im Verlauf) — Taste U oder Strg+Z` 
+        : 'Keine Spielzüge zum Zurücknehmen vorhanden';
+    }
+
+    const canRedo = this.redoStack.length > 0;
+    if (this.btnRedoEl) {
+      this.btnRedoEl.disabled = !canRedo;
+      this.btnRedoEl.title = canRedo 
+        ? `Einen Stein vorwärtsgehen (${this.redoStack.length} im Vorwärts-Speicher) — Taste V oder Strg+Y` 
+        : 'Keine Spielzüge im Vorwärts-Speicher vorhanden';
+    }
   }
 
   updateAlgoDepthDisplay() {
